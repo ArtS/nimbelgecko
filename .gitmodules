@@ -1,0 +1,12 @@
+[submodule "external/node-config"]
+	path = external/node-config
+	url = git://github.com/ArtS/node-config.git
+[submodule "external/connect-mongodb"]
+	path = external/connect-mongodb
+	url = http://github.com/masylum/connect-mongodb.git
+[submodule "external/node-mongodb-native"]
+	path = external/node-mongodb-native
+	url = http://github.com/christkv/node-mongodb-native.git
+[submodule "external/connect"]
+	path = external/connect
+	url = http://github.com/senchalabs/connect.git
