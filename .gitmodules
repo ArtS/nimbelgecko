@@ -10,3 +10,6 @@
 [submodule "external/connect"]
 	path = external/connect
 	url = http://github.com/senchalabs/connect.git
+[submodule "external/strobe-templates"]
+	path = external/strobe-templates
+	url = git://github.com/skid/strobe-templates.git
