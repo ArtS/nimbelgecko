@@ -13,6 +13,3 @@
 [submodule "external/strobe-templates"]
 	path = external/strobe-templates
 	url = git://github.com/skid/strobe-templates.git
-[submodule "strobe-templates"]
-	path = strobe-templates
-	url = git://github.com/skid/strobe-templates.git
