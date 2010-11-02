@@ -16,3 +16,7 @@
 [submodule "external/ejs"]
 	path = external/ejs
 	url = git://github.com/visionmedia/ejs.git
+[submodule "external/node-oauth"]
+    path = external/node-oauth
+    url = http://github.com/ciaranj/node-oauth.git
+
