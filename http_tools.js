@@ -8,6 +8,6 @@ exports.html = function(f) {
 }
 
 exports.redirect = function(res, url) {
-    res.writeHead(300, { Location: url });
+    res.writeHead(302, { Location: url });
     res.end();
 }

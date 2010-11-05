@@ -2,7 +2,7 @@ var conf = require('node-config'),
     oAuth = require('node-oauth').OAuth,
     URL = require('url'),
     util = require('util'),
-    http_tools = require('./http_tools');
+    http_tools = require('http_tools');
 
 function getAuth() {
     return new oAuth(

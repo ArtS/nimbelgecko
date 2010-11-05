@@ -4,22 +4,21 @@ require.paths.unshift('./external');
 require.paths.unshift('./external/node-mongodb-native/lib');
 require.paths.unshift('./external/connect/lib');
 require.paths.unshift('./external/ejs/lib');
+require.paths.unshift('.');
+
+require('extensions');
 
 var util = require('util'),
     URL = require('url'),
     qs = require('querystring'),
-    mongodb = require('mongodb'),
-    mongoStore = require('./external/connect-mongodb'),
     connect = require('connect'),
     templates = require('./templates'),
     oauth = require('./oauth'),
     conf = require('node-config'),
-    http_tools = require('./http_tools');
+    db = require('db'),
+    http_tools = require('./http_tools'),
+    log = require('log');
 
-
-function i(o) {
-    console.log(util.inspect(o, true, 2));
-}
 
 function routes(app) {
 
@@ -62,15 +61,26 @@ function routes(app) {
                 req.session.oauth_token_secret,
                 oauth_verifier,
                 function(error, oauth_access_token, oauth_access_token_secret, results2) {
+
                     if(error) {
-                        i(error);
+                        log.inspect(error);
                         http_tools.redirect(res, '/error');
                         return;
                     }
-                    
-                    req.session.oauth_access_token = oauth_access_token;
-                    req.session.oauth_access_token_secret = oauth_access_token_secret;
+
+                    db.saveUserDetails(
+                        results2.user_id,
+                        results2.screen_name,
+                        oauth_access_token,
+                        oauth_access_token_secret);
+                     
+                    req.session.currentUser = {
+                        screen_name: results2.screen_name,
+                        user_id: results2.user_id
+                    };
+
                     req.sessionStore.set(req.sessionID, req.session);
+
                     http_tools.redirect(res, '/great-success');
                 }
             );            
@@ -87,15 +97,13 @@ function routes(app) {
         )
     );
 
-    
-
     app.get('/register',
         function(req, res, next) {
 
             oauth.getOAuthRequestToken(
                 function(error, oauth_token, oauth_token_secret, results) {
                     if(error) {
-                        i(error);
+                        log.inspect(error);
                         http_tools.redirect(res, '/error');
                     } else {
 
@@ -114,17 +122,26 @@ function routes(app) {
 conf.initConfig(
     function(err) {
         if(err) {
-            console.log(err);
+            log.error(err);
             return;
         }
 
-        connect.createServer(
-            connect.bodyDecoder(),
-            connect.cookieDecoder(),
-            connect.session({ store: mongoStore() }),
-            connect.router(routes),
-            connect.staticProvider('./static')
-        ).listen(8080, '192.168.1.2');
+        db.initDatabase(['tweets', 'users'],
+            //TODO: create separate instance for static files?
+            function(err) {
+                if(err) {
+                    log.error(err);
+                    return;
+                }
+
+                connect.createServer(
+                    connect.bodyDecoder(),
+                    connect.cookieDecoder(),
+                    connect.session({ store: db.mongoStore() }),
+                    connect.router(routes),
+                    connect.staticProvider('./static')
+                ).listen(8081, '192.168.1.2');
+            }
+        );
     }
 );
-
