@@ -69,19 +69,29 @@ function routes(app) {
                     }
 
                     db.saveUserDetails(
-                        results2.user_id,
-                        results2.screen_name,
-                        oauth_access_token,
-                        oauth_access_token_secret);
-                     
-                    req.session.currentUser = {
-                        screen_name: results2.screen_name,
-                        user_id: results2.user_id
-                    };
+                        {
+                            user_id: results2.user_id,
+                            screen_name: results2.screen_name,
+                            oauth_access_token: oauth_access_token,
+                            oauth_access_token_secret: oauth_access_token_secret
+                        },
 
-                    req.sessionStore.set(req.sessionID, req.session);
+                        function(err) {
+                            if(err) {
+                                http_tools.redirect(res, '/error');
+                                return;
+                            }
 
-                    http_tools.redirect(res, '/great-success');
+                            req.session.currentUser = {
+                                screen_name: results2.screen_name,
+                                user_id: results2.user_id
+                            };
+
+                            req.sessionStore.set(req.sessionID, req.session);
+
+                            http_tools.redirect(res, '/great-success');
+                        }
+                    );
                 }
             );            
         }

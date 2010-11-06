@@ -8,36 +8,94 @@ var mongo = require('node-mongodb-native/lib/mongodb'),
         {}
     ),
     mongoStore = require('connect-mongodb'),
-    log = require('log');
+    log = require('log'),
+    models = require('models'),
+    USERS_COLLECTION = 'users',
+    collections = {};
 
+function _insertNewUser(params, callback) {
 
-exports.mongoStore = mongoStore;
+    var users = collections[USERS_COLLECTION];
 
-exports.saveUserDetails = function(user_id, screen_name, oauth_access_token, oauth_access_token_secret) {
-    // First, check whether we already have this user's profile.
-    exports.collections['users'].find(
+    users.insert(
+        new models.User(
+            {
+                user_id: params.user_id,
+                screen_name: params.screen_name,
+                oauth_access_token: params.oauth_access_token,
+                oauth_access_token_secret: params.oauth_access_token_secret
+            }
+        ),
+        function(err, doc) {
+            if(err) {
+                return callback(err);
+            }
+
+            return callback(null);
+        }
     );
-    // 
 }
 
-exports.collections = {};
+function _updateExistingUser(params, doc, callback) {
+    
+    var users = collections[USERS_COLLECTION];
 
-exports.initDatabase = function(collections, onDatabaseReady) {
-    var _collectionsCopy;
+    doc.screen_name = params.screen_name;
+    doc.oauth_access_token = params.oauth_access_token;
+    doc.oauth_access_token_secret = params.oauth_access_token_secret;
+    
+    users.save(
+        doc, 
+        function(err, docs) {
+            if(err) {
+                return callback(err);
+            }
+            return callback(null);
+        }
+    );
+}
 
-    if (!Array.isArray(collections)) {
+
+function saveUserDetails(params, callback) {
+
+    var users = collections[USERS_COLLECTION];
+
+    // First, check whether we already have this user's profile.
+    users.findOne(
+        { user_id: params.user_id },
+        function(err, doc) {
+            if (err) {
+                callback(err);
+                return;                
+            }
+
+            if (typeof doc === 'undefined' || doc === null) {
+                _insertNewUser(params, callback);
+            } else {
+                _updateExistingUser(params, doc, callback);
+            }
+        }
+    );
+}
+
+
+function initDatabase(colNames, onDatabaseReady) {
+
+    var collectionsCopy;
+
+    if (!Array.isArray(colNames)) {
         throw {
             name: 'InvalidArgumentException',
             message: 'collections parameter must be an array.' 
         };
     }
 
-    _collectionsCopy = collections.splice(0);
+    collectionsCopy = colNames.splice(0);
 
     // Recursive function for initialising all the collections
-    // supplied in 'collections' parameter to initDatabase()
+    // supplied in 'colNames' parameter to initDatabase()
     function _initCollections() {
-        var colName = _collectionsCopy.pop(0);
+        var colName = collectionsCopy.pop(0);
         if(colName === undefined) {
             onDatabaseReady(null);
             return;
@@ -51,7 +109,7 @@ exports.initDatabase = function(collections, onDatabaseReady) {
                     return;
                 }
 
-                exports.collections[colName] = collection;
+                collections[colName] = collection;
                 _initCollections();
             }
         );
@@ -67,3 +125,10 @@ exports.initDatabase = function(collections, onDatabaseReady) {
         }
     );
 }
+
+// Exports
+
+exports.mongoStore = mongoStore;
+exports.collections = collections;
+exports.initDatabase = initDatabase;
+exports.saveUserDetails = saveUserDetails;
