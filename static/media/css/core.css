@@ -47,13 +47,55 @@ img::-moz-selection {background: transparent;}
 ----------------------------------------------------------------------*/
 
 body {
-	background-color: #fff;
-	color: #000;
-	font: normal 16px/22px Helvetica, Arial, Verdana, sans-serif;
-	margin: 0;
-	padding: 0;
+	background-color: #e8e8e8;
+	color: #3c3c3c;
+	font: 16px/1.5 "skolar-1","skolar-2",Georgia,serif;
+	margin: 0 auto;
+	padding: 72px 48px 0;
+    width: 960px;
 }
 
 abbr {
 	cursor: help;
+}
+
+h1, .tagline p {
+    font-family: "etica-1","etica-2",Helvetica,Arial,sans-serif;
+}
+
+header h1, article h1 {
+    color: #171717;
+}
+
+header h1 {
+    text-align: left;
+    font-size: 74px;
+    line-height: 86px;
+    letter-spacing: -2px;
+    font-weight: bold;
+}
+
+
+.tagline p {
+    font-weight: 300;
+}
+
+.tagline p {
+    text-align: left;
+    font-size: 32px;
+    line-height: 30px;
+    letter-spacing: -1px;
+}
+
+.action a {
+    border: 0px;
+    padding: 50px 0;
+}
+
+a.action-link {
+    display: block;
+}
+
+p small {
+    font-size: 13px;
 }
