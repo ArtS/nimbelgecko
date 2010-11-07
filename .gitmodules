@@ -20,3 +20,6 @@
     path = external/node-oauth
     url = http://github.com/ciaranj/node-oauth.git
 
+[submodule "external/node-dj"]
+	path = external/node-dj
+	url = git://github.com/lrbabe/node-DJs.git
