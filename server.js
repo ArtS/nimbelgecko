@@ -100,9 +100,7 @@ function routes(app) {
     app.get('/great-success',
         http_tools.html(
             function(req, res, next) {
-                res.write(req.session.oauth_access_token + '<br/>');
-                res.write(req.session.oauth_access_token_secret + '<br/>');
-                res.end('omg this is soo cool!');
+                res.end('<html><body>omg this is soo cool!<br/></body></html>');
             }
         )
     );

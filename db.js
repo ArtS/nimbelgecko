@@ -13,6 +13,7 @@ var mongo = require('node-mongodb-native/lib/mongodb'),
     USERS_COLLECTION = 'users',
     collections = {};
 
+
 function _insertNewUser(params, callback) {
 
     var users = collections[USERS_COLLECTION];
