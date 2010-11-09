@@ -4,6 +4,7 @@ require.paths.unshift('./external');
 require.paths.unshift('./external/node-mongodb-native/lib');
 require.paths.unshift('./external/connect/lib');
 require.paths.unshift('./external/ejs/lib');
+require.paths.unshift('./internal');
 require.paths.unshift('.');
 
 require('extensions');
@@ -12,11 +13,11 @@ var util = require('util'),
     URL = require('url'),
     qs = require('querystring'),
     connect = require('connect'),
-    templates = require('./templates'),
-    oauth = require('./oauth'),
+    templates = require('templates'),
+    oauth = require('oauth'),
     conf = require('node-config'),
     db = require('db'),
-    http_tools = require('./http_tools'),
+    http_tools = require('http_tools'),
     log = require('log');
 
 
