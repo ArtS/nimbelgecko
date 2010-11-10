@@ -1,9 +1,10 @@
 var util = require('util');
 
 
-exports.inspect = function(obj) {
+exports._inspect = function(obj) {
     util.puts(util.inspect(obj, true, 2));
-}
+};
+
 
 exports.error = function(err, message) {
     if(message !== null && message !== undefined) {
@@ -14,7 +15,7 @@ exports.error = function(err, message) {
         util.log(err.stack);
     }
 
-    exports.inspect(err);
+    exports._inspect(err);
 
     return err;
-}
+};
