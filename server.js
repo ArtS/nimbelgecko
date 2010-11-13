@@ -9,51 +9,92 @@ require.paths.unshift('.');
 
 require('extensions');
 
+
 var util = require('util'),
     connect = require('connect'),
-    oauth_views = require('./views/oauth'),
-    ng = require('ng');
+    ng = require('ng'),
+    urls;
 
 
-function routes(app) {
+urls = [
+    {
+        url: '/register', 
+        view: ng.views.oauth.register
+    },
+    {
+        url: '/oauth/callback',
+        view: ng.views.oauth.callback
+    },
+    {
+        url: '/',
+        view: ng.views.generic.root,
+        template: 'index.html'
+    },
+    {
+        url: '/home',
+        view: ng.views.generic.home,
+        template: 'home.html'
+    },
+    {
+        url: '/error',
+        view: ng.views.generic.error,
+        template: 'index.html'
+    }
+];
 
-    app.get('/', 
-        ng.http_tools.html(
-            function(req, res, next) {
-                ng.templates.render('index.html', {},
-                    function(data) {
-                        res.write(data);
-                        res.end();
+
+function bindUrl(app, url) {
+    app.get(url.url,
+        function(req, res, next) {
+            if(url.template === undefined) {
+                // If no template defined, leave the rendering up to the view
+                url.view(req, res, next);
+            } else {
+                // Otherwise, just get context from view and use it to render
+                // the template.
+                url.view(req, res, 
+                    function(err, context) {
+                        // In case view failed, show error
+                        if(err) {
+                            ng.http.error(req, res, err, 
+                                          'Error obtaining context for view at ' + url.url);
+                            return;
+                        }
+
+                        ng.templates.render(url.template, context,
+                            // In case rendering failed, show error
+                            function(err, htmlResult) {
+                                if(err) {
+                                    ng.http.error(req, res, err,
+                                                  'Error when rendering template ' + url.template);
+                                    return;
+                                }
+
+                                ng.http.writeHtml(res, htmlResult);
+                            }
+                        );
                     }
                 );
             }
-        )
-    );
-
-    app.get('/register', ng.views.oauth.register);
-    app.get('/oauth/callback', ng.views.oauth.callback);
-
-    app.get('/great-success',
-        ng.http_tools.html(
-            function(req, res, next) {
-                res.end('<html><body>omg this is soo cool!<br/></body></html>');
-            }
-        )
-    );
-
-    app.get('/error',
-        ng.http_tools.html(
-            function(req, res, next) {
-                res.end('oops something went wrong.');
-            }
-        )
+        }
     );
 }
+
+
+function routes(app) {
+    var i = 0,
+        l = urls.length;
+
+    for(; i < l; i++) {
+        bindUrl(app, urls[i]);
+    }
+}
+
 
 ng.conf.initConfig(
     function(err) {
         if(err) {
-            ng.log.error(err);
+            ng.log.error(err, 'Config initialisation failed.');
             return;
         }
 
@@ -61,7 +102,7 @@ ng.conf.initConfig(
             //TODO: create separate instance for static files?
             function(err) {
                 if(err) {
-                    ng.log.error(err);
+                    ng.log.error(err, 'Database initialisation failed.');
                     return;
                 }
 
@@ -74,5 +115,11 @@ ng.conf.initConfig(
                 ).listen(8081, '192.168.1.2');
             }
         );
+    }
+);
+
+process.on('uncaughtException',
+    function(err) {
+        ng.log.error(err, 'Unhandled exception');
     }
 );

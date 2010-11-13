@@ -2,7 +2,7 @@ var conf = require('node-config'),
     oAuth = require('node-oauth').OAuth,
     URL = require('url'),
     util = require('util'),
-    http_tools = require('http_tools');
+    ng = require('ng');
 
 function getAuth() {
     return new oAuth(
@@ -27,5 +27,5 @@ exports.getOAuthAccessToken = function(oauth_token, oauth_token_secret, oauth_ve
 exports.redirectToTwitterAuth = function(res, oauth_token) {
     var url = URL.parse('http://api.twitter.com/oauth/authenticate');
     url.query = { oauth_token: oauth_token };
-    http_tools.redirect(res, URL.format(url));
+    ng.http.redirect(res, URL.format(url));
 }

@@ -1,13 +1,32 @@
-var CONTENT_TYPE_HTML = {'Content-type': 'text/html'};
+var CONTENT_TYPE_HTML = {'Content-type': 'text/html'},
+    ng = require('ng');
 
-exports.html = function(f) {
-    return function(req, res, next) {
-        res.writeHead(CONTENT_TYPE_HTML);
-        f(req, res, next);
-    }
+
+function writeHtml(res, text) {
+    res.writeHead(CONTENT_TYPE_HTML);
+    res.end(text);
 }
 
-exports.redirect = function(res, url) {
+
+function redirect(res, url) {
     res.writeHead(302, { Location: url });
     res.end();
 }
+
+
+function error(req, res) {
+    var logArgs = Array.prototype.splice.apply(arguments, [2]);
+
+    // Log to console whatever is available (err object/message)
+    if(logArgs.length >= 1) {
+        ng.session.setSessionError(req, logArgs[0]);
+        ng.log.error.apply(null, logArgs);
+    }
+
+    redirect(res, '/error');
+}
+
+
+exports.error = error;
+exports.redirect = redirect;
+exports.writeHtml = writeHtml;

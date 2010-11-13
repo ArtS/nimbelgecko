@@ -1,15 +1,13 @@
 var ejs = require('ejs'),
     fs = require('fs'),
-    path = require('path');
+    path = require('path'),
+    templatesPath = './templates/';
 
 
-exports.templatesPath = './templates/';
-
-
-exports.render = function(name, cnt, callback) {
+function render(name, cnt, callback) {
 
     var context = cnt | {},
-        filePath = path.join(exports.templatesPath, '/index.html'),
+        filePath = path.join(templatesPath, name),
         rS = fs.createReadStream(filePath),
         fileData = '';
 
@@ -22,13 +20,21 @@ exports.render = function(name, cnt, callback) {
     rS.on('end',
         function(err) {
             if(err) {
-                console.log(err);
-                throw err;
+                callback(err, null);
+                return;
             }
 
-            callback(ejs.render(fileData, context));
+            callback(null, ejs.render(fileData, context));
+        }
+    );
+
+    rS.on('error',
+        function(err) {
+            callback(err, null);
         }
     );
 }
 
+exports.render = render;
 
+exports.templatesPath = templatesPath;
