@@ -7,51 +7,27 @@ require.paths.unshift('./external/ejs/lib');
 require.paths.unshift('./internal');
 require.paths.unshift('.');
 
+
+// JavaScript extensions
 require('extensions');
 
 
 var util = require('util'),
     connect = require('connect'),
     ng = require('ng'),
-    urls;
+    urls = require('urls').urls;
 
 
-urls = [
-    {
-        url: '/register', 
-        view: ng.views.oauth.register
-    },
-    {
-        url: '/oauth/callback',
-        view: ng.views.oauth.callback
-    },
-    {
-        url: '/',
-        view: ng.views.generic.root,
-        template: 'index.html'
-    },
-    {
-        url: '/home',
-        view: ng.views.generic.home,
-        template: 'home.html'
-    },
-    {
-        url: '/error',
-        view: ng.views.generic.error,
-        template: 'index.html'
-    }
-];
-
-
-function bindUrl(app, url) {
+function bindUrls(app, url) {
     app.get(url.url,
         function(req, res, next) {
+
+            // If no template defined, leave the rendering up to the view
             if(url.template === undefined) {
-                // If no template defined, leave the rendering up to the view
                 url.view(req, res, next);
             } else {
-                // Otherwise, just get context from view and use it to render
-                // the template.
+            // Otherwise, get the context from the view and use it to 
+            // render the template.
                 url.view(req, res, 
                     function(err, context) {
                         // In case view failed, show error
@@ -86,7 +62,7 @@ function routes(app) {
         l = urls.length;
 
     for(; i < l; i++) {
-        bindUrl(app, urls[i]);
+        bindUrls(app, urls[i]);
     }
 }
 

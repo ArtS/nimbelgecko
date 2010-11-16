@@ -15,11 +15,13 @@ function redirect(res, url) {
 
 
 function error(req, res) {
-    var logArgs = Array.prototype.splice.apply(arguments, [2]);
+    var logArgs = Array.prototype.splice.apply(arguments, [2]),
+        errorStr = '';
 
     // Log to console whatever is available (err object/message)
     if(logArgs.length >= 1) {
-        ng.session.setSessionError(req, logArgs[0]);
+        errorStr = ng.log.getErrorStr(logArgs[0]);
+        ng.session.setSessionError(req, errorStr);
         ng.log.error.apply(null, logArgs);
     }
 

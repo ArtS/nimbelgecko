@@ -43,13 +43,7 @@ function getSessionError(req) {
 
 
 function setSessionError(req, err) {
-    var clone;
-
-    function f() {}
-    f.prototype = err;
-    clone = new f();
-
-    storeObject(req, SESSION_ERROR, clone);
+    storeObject(req, SESSION_ERROR, err);
 }
 
 
@@ -58,3 +52,4 @@ exports.setSessionError = setSessionError;
 exports.setLoggedInUser = setLoggedInUser;
 exports.storeObject = storeObject;
 exports.getObject = getObject;
+

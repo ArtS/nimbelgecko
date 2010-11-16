@@ -8,4 +8,5 @@ exports.session = require('session');
 
 exports.views = {};
 exports.views.oauth = require('./views/oauth');
+exports.views.core = require('./views/core');
 exports.views.generic = require('./views/generic');
