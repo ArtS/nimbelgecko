@@ -1,12 +1,13 @@
 var ejs = require('ejs'),
     fs = require('fs'),
     path = require('path'),
-    templatesPath = './templates/';
+    templatesPath = './templates/',
+    util = require('util');
 
 
 function render(name, cnt, callback) {
 
-    var context = cnt | {},
+    var context = (cnt === undefined || cnt === null) ? {} : cnt,
         filePath = path.join(templatesPath, name),
         rS = fs.createReadStream(filePath),
         fileData = '';
@@ -24,7 +25,7 @@ function render(name, cnt, callback) {
                 return;
             }
 
-            callback(null, ejs.render(fileData, context));
+            callback(null, ejs.render(fileData, { locals: context }));
         }
     );
 
