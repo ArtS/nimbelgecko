@@ -87,6 +87,14 @@
 	<article>
         <section class="tagline">
             <p>Tweets</p>
+
+            <% for(var i = 0; i < tweets.length; i++) { %>
+                <div class="tweet">
+                    <span class="text"><%= tweets[i].text %></span>
+                    <span class="author">@<%= tweets[i].user.screen_name %></span>
+                </div>
+            <% } %>
+
         </section>
 	</article>
 	

@@ -47,8 +47,8 @@ exports.callback = function(req, res, next) {
 
                     ng.session.setLoggedInUser(req,
                         {
-                        screen_name: results2.screen_name,
-                        user_id: results2.user_id
+                            screen_name: results2.screen_name,
+                            user_id: results2.user_id
                         }
                     );
 

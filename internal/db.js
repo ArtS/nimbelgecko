@@ -11,6 +11,7 @@ var mongo = require('node-mongodb-native/lib/mongodb'),
     log = require('log'),
     models = require('models'),
     USERS_COLLECTION = 'users',
+    TWEETS_COLLECTION = 'tweets',
     collections = {};
 
 
@@ -127,9 +128,43 @@ function initDatabase(colNames, onDatabaseReady) {
     );
 }
 
+function getRecentTweets(user_id, callback) {
+
+    var col = collections[TWEETS_COLLECTION];
+
+    col.find(
+        { 
+            owner_id: user_id 
+        },
+        { 
+            limit: 300,
+            sort: [['id', 'desc']]
+        },
+        function(err, cursor) {
+            if(err) {
+                callback(err, null);
+                return;
+            }
+
+            cursor.toArray(
+                function(err, arr) {
+                    if(err) {
+                        callback(err, null);
+                        return;
+                    }
+                    
+                    callback(null, arr);
+                }
+            );
+
+        }
+    );
+}
+
 // Exports
 
 exports.mongoStore = mongoStore;
 exports.collections = collections;
 exports.initDatabase = initDatabase;
 exports.saveUserDetails = saveUserDetails;
+exports.getRecentTweets = getRecentTweets;

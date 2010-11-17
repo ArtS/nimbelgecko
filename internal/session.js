@@ -1,5 +1,6 @@
 var util = require('util'),
-    SESSION_ERROR = 'session_error';
+    SESSION_ERROR = 'session_error',
+    USER_SESSION_ID = 'user';
 
 
 function _ensureSessionObject(session) {
@@ -27,13 +28,18 @@ function getObject(req, name) {
 }
 
 
-function setLoggedInUser(req, user) {
-    storeObject(req, 'user',
+function setLoggedInUser(req, user_profile) {
+    storeObject(req, USER_SESSION_ID,
         {
-            user: user,
+            user_profile: user_profile,
             isAuthenticated: true
         }
     );
+}
+
+
+function getLoggedInUser(req) {
+    return getObject(req, USER_SESSION_ID);
 }
 
 
@@ -50,6 +56,7 @@ function setSessionError(req, err) {
 exports.getSessionError = getSessionError;
 exports.setSessionError = setSessionError;
 exports.setLoggedInUser = setLoggedInUser;
+exports.getLoggedInUser = getLoggedInUser;
 exports.storeObject = storeObject;
 exports.getObject = getObject;
 
