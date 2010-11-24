@@ -51,30 +51,117 @@ body {
 	color: #3c3c3c;
 	font: 16px/1.5 "skolar-1","skolar-2",Georgia,serif;
 	margin: 0 auto;
-	padding: 72px 48px 0;
-    width: 960px;
+	padding: 5px 25px 0;
+    width: 100%;
 }
+
 
 abbr {
 	cursor: help;
 }
 
-h1, .tagline p {
-    font-family: "etica-1","etica-2",Helvetica,Arial,sans-serif;
+a:visited {
+    color: gray;
 }
 
-header h1, article h1 {
+a {
+    color: darkgray;
+}
+
+h1, h2, h3, h4, h5, h6,
+section.nav {
+    font-family: "etica-1", "etica-2",Helvetica,Arial,sans-serif;
+}
+
+h1, .tagline p {
+}
+
+header h1, header h2, header h3, article h1 {
     color: #171717;
 }
 
-header h1 {
+header h1, header h2, header h3 {
     text-align: left;
-    font-size: 74px;
-    line-height: 86px;
-    letter-spacing: -2px;
+    letter-spacing: 2px;
     font-weight: bold;
 }
 
+header h1 {
+    font-size: 74px;
+    line-height: 86px;
+}
+
+header h2 {
+    font-size: 24px;
+    line-height: 45px;
+}
+
+header h3 {
+    font-size: 16px;
+    line-height: 22px;
+}
+
+/*
+ * Column sections
+ */
+section.categories {
+    padding-top: 7px;
+}
+
+section.category header {
+    margin: 0px 0px 10px 0px;
+}
+
+section.category {
+    margin: 0px 12px 0px 0px;
+    padding: 4px 12px 20px 10px;
+    float: left;
+}
+
+section.category {
+    border-radius: 10px;
+    -moz-border-radius: 10px;
+    background: lightgray;
+}
+
+/*
+ * Navigation
+ */
+
+section.nav {
+    padding: 8px 0px;
+    margin: 0px 0px 5px 0px;
+    background: lightgray;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+}
+
+section.nav ul li {
+    font-size: 15px;
+    letter-spacing: 0.7px;
+    line-height: 18px;
+}
+
+section.nav ul li {
+    color: white;
+    background: gray;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+}
+
+section.nav ul li {
+    float: left;
+    list-style: none;
+    padding: 2px 6px;
+    margin: 0px 5px 0px 5px;
+}
+
+a.tiny-action {
+    font-size: 10px;
+    letter-spacing: 0.7px;
+}
+
+/* End Navigation */
 
 .tagline p {
     font-weight: 300;
@@ -98,4 +185,23 @@ a.action-link {
 
 p small {
     font-size: 13px;
+}
+
+div.tweet {
+    width: 300px;
+    margin: 0px 0px 23px 0px;
+    font-size: 13px;
+    line-height: 16px;
+}
+
+.clear {
+    clear: both;
+}
+
+.left {
+    float: left;
+}
+
+.right {
+    float: right;
 }

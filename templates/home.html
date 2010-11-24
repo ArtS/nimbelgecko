@@ -85,15 +85,60 @@
 <div>
 
 	<article>
-        <section class="tagline">
-            <p>Tweets</p>
+        <section>
+            <header>
+                <h2>Tweets</h2>
+            </header>
 
-            <% for(var i = 0; i < tweets.length; i++) { %>
-                <div class="tweet">
-                    <span class="text"><%= tweets[i].text %></span>
-                    <span class="author">@<%= tweets[i].user.screen_name %></span>
-                </div>
-            <% } %>
+            <% 
+            var tweet,
+                length_cat = cat_names.length,
+                length_j,
+                category,
+                i = 0,
+                j;
+            %>
+
+            <section class="nav">
+                <ul>
+                    <% for (i = 0; i < length_cat; i++) { %>
+                    <li><%= cat_names[i] %>&nbsp;(<%= tweets[cat_names[i]].unread_count %>)</li>
+                    <% } %>
+                </ul>
+                <div class="clear"></div>
+            </section>
+
+            <section class="categories">
+                <% for (i = 0; i < length_cat; i++) { %>
+                    <section class="category">
+
+                        <header>
+                            <div class="left">
+                                <h3><%= cat_names[i] %></h3>
+                            </div>
+                            <div class="right">
+                                <a class="tiny-action" href="/action/mark-all-read/<%= cat_names[i]%>">[mark all read]</a>
+                            </div>
+                            <div class="clear"></div>
+                        </header>
+
+                        <% 
+                        category = tweets[cat_names[i]];
+                        length_j = category.length;
+                        for (j = 0; j < length_j; j++) { 
+                            tweet = category[j];
+                            %>
+                            <div class="tweet">
+                                <span class="text"><%- tweet.escaped_text %></span>
+                                <% if (tweet.user !== undefined) { %>
+                                <span class="author">@<%= tweet.user.screen_name %></span>
+                                <% } %>
+                            </div>
+                        <% } %>
+                    </section>
+                <% } %>
+                <div class="clear"></div>
+            </section>
 
         </section>
 	</article>

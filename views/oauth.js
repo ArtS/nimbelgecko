@@ -26,32 +26,31 @@ exports.callback = function(req, res, next) {
         oauth_verifier,
         function(error, oauth_access_token, oauth_access_token_secret, results2) {
 
+            var user;
+
             if(error) {
                 ng.http.error(req, res, err);
                 return;
             }
 
-            ng.db.saveUserDetails(
+            user = new ng.models.User(
                 {
                     user_id: results2.user_id,
                     screen_name: results2.screen_name,
                     oauth_access_token: oauth_access_token,
                     oauth_access_token_secret: oauth_access_token_secret
-                },
-
+                }
+            );
+            
+            ng.db.saveUserDetails(
+                user,
                 function(err) {
                     if(err) {
                         ng.http.error(req, res, err, 'Error saving user details');
                         return;
                     }
 
-                    ng.session.setLoggedInUser(req,
-                        {
-                            screen_name: results2.screen_name,
-                            user_id: results2.user_id
-                        }
-                    );
-
+                    ng.session.setLoggedInUser(req, user);
                     ng.http.redirect(res, '/home');
                 }
             );
