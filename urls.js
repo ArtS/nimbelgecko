@@ -1,4 +1,5 @@
-var ng = require('ng');
+var ng = require('ng'),
+    login_required = ng.http.login_required;
 
 exports.urls = [
     {
@@ -21,11 +22,11 @@ exports.urls = [
     },
     {
         url: '/home',
-        view: ng.views.core.home,
+        view: login_required(ng.views.core.home),
         template: 'home.html'
     },
     {
-        url: '/action/mark-all-read/:category',
-        view: ng.views.actions.mark_all_read
+        url: '/ajax/tweets',
+        view: login_required(ng.views.ajax.tweets)
     }
 ];

@@ -104,6 +104,7 @@ header h3 {
 /*
  * Column sections
  */
+
 section.categories {
     padding-top: 7px;
 }
@@ -174,6 +175,10 @@ a.tiny-action {
     letter-spacing: -1px;
 }
 
+/*
+ * Links
+ */
+
 .action a {
     border: 0px;
     padding: 50px 0;
@@ -182,6 +187,13 @@ a.tiny-action {
 a.action-link {
     display: block;
 }
+
+.author a {
+    color: gray;
+    text-decoration: none;
+}
+
+/* end Links */
 
 p small {
     font-size: 13px;

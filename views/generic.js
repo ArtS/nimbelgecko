@@ -9,7 +9,7 @@ exports.root = function(req, res, next) {
 exports.error = function(req, res, next) {
     var html = 'oops something went wrong.' + 
                '<br/>' + ng.session.getSessionError(req);
-    ng.http.writeHtml(res, html);
+    ng.http.writeHtml(res, html, 500);
 }
 
 

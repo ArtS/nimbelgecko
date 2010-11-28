@@ -10,7 +10,7 @@ exports.views = {};
 exports.views.oauth = require('./views/oauth');
 exports.views.core = require('./views/core');
 exports.views.generic = require('./views/generic');
-exports.views.actions = require('./views/actions');
+exports.views.ajax = require('./views/ajax');
 
 exports.models = {};
 exports.models.User = require('models').User;

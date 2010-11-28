@@ -109,8 +109,12 @@
             </section>
 
             <section class="categories">
-                <% for (i = 0; i < length_cat; i++) { %>
-                    <section class="category">
+            <% 
+                for (i = 0; i < length_cat; i++) {
+                    category = cat_names[i];
+                    is_visible = tweets[category].unread_count != 0;
+            %>
+            <section class="category" <% if (!is_visible) { %>style="display: none"<% } %>>
 
                         <header>
                             <div class="left">
@@ -131,7 +135,9 @@
                             <div class="tweet">
                                 <span class="text"><%- tweet.escaped_text %></span>
                                 <% if (tweet.user !== undefined) { %>
-                                <span class="author">@<%= tweet.user.screen_name %></span>
+                                <span class="author">
+                                    <a href="http://twitter.com/<%= tweet.user.screen_name %>/statuses/<%= tweet.id %>">@<%= tweet.user.screen_name %></a>
+                                </span>
                                 <% } %>
                             </div>
                         <% } %>

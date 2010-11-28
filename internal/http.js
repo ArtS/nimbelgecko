@@ -1,9 +1,17 @@
 var CONTENT_TYPE_HTML = {'Content-type': 'text/html'},
+    CONTENT_TYPE_JSON = {'Content-type': 'application/json'},
     ng = require('ng');
 
 
-function writeHtml(res, text) {
-    res.writeHead(CONTENT_TYPE_HTML);
+function writeJSON(res, obj, status_code) {
+    status_code = status_code === undefined ? 200 : status_code;
+    res.writeHead(status_code, CONTENT_TYPE_JSON);
+    res.end(JSON.stringify(obj));    
+}
+
+function writeHtml(res, text, status_code) {
+    status_code = status_code === undefined ? 200 : status_code;
+    res.writeHead(status_code, CONTENT_TYPE_HTML);
     res.end(text);
 }
 
@@ -28,7 +36,29 @@ function error(req, res) {
     redirect(res, '/error');
 }
 
+// TODO: move to decorators?
+function login_required(callback) {
+    return function(req, res, next) {
+
+        var user = ng.session.getLoggedInUser(req);
+        
+        if (!user) {
+            // TODO: replace all '/' in .redirect('/')
+            // with config.LOGIN_URL
+            ng.http.redirect(res, '/');
+            return;
+        }
+
+        req.ng = req.ng || {};
+        req.ng.user = user;
+
+        callback(req, res, next);
+    }
+}
+
 
 exports.error = error;
 exports.redirect = redirect;
 exports.writeHtml = writeHtml;
+exports.writeJSON = writeJSON;
+exports.login_required = login_required;
