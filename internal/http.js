@@ -43,14 +43,12 @@ function login_required(callback) {
         var user = ng.session.getLoggedInUser(req);
         
         if (!user) {
-            // TODO: replace all '/' in .redirect('/')
-            // with config.LOGIN_URL
-            ng.http.redirect(res, '/');
+            ng.http.redirect(res, ng.conf.LOGIN_URL);
             return;
         }
 
         req.ng = req.ng || {};
-        req.ng.user = user;
+        req.ng.user = user.user_profile;
 
         callback(req, res, next);
     }
@@ -61,4 +59,5 @@ exports.error = error;
 exports.redirect = redirect;
 exports.writeHtml = writeHtml;
 exports.writeJSON = writeJSON;
+
 exports.login_required = login_required;

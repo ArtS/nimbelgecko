@@ -21,6 +21,11 @@ exports.urls = [
         template: 'index.html'
     },
     {
+        url: '/home_old',
+        view: login_required(ng.views.core.home_old),
+        template: 'home.html'
+    },
+    {
         url: '/home',
         view: login_required(ng.views.core.home),
         template: 'home.html'
