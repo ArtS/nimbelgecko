@@ -62,8 +62,8 @@
 	<script src="http://ie7-js.googlecode.com/svn/version/2.0(beta3)/IE8.js"></script>
 	<![endif]-->
 	
-    <script src="/media/js/prototype.js"></script>
-    <script src="/media/js/underscore-min.js"></script>
+    <script src="/media/js/jquery-1.4.4.min.js"></script>
+    <script src="/media/js/underscore.js"></script>
     <script src="/media/js/backbone.js"></script>
 	<script src="/media/js/pure/pure_packed.js"></script>
 
@@ -104,7 +104,8 @@
                                     <h3></h3>
                                 </div>
                                 <div class="right">
-                                    <a class="tiny-action" href="#home1">[mark all read]</a>
+                                    <a class="tiny-action" href="#home">[home]</a>
+                                    <a class="tiny-action" href="#actions/mark-read/1">[mark all read]</a>
                                 </div>
                                 <div class="clear"></div>
                             </header>
@@ -141,8 +142,8 @@
 
         var Controller = Backbone.Controller.extend({
             routes: {
-                'home1': 'home',
-                'actions/mark_read/:id': 'markRead'
+                'home': 'home',
+                'actions/mark-read/:id': 'markRead'
             },
 
             home: function() {
@@ -156,12 +157,9 @@
 
         var ctrl = new Controller();
 
-        ctrl.bind('route:home1', function() {console.log('123')});
-
-        document.observe('dom:loaded',
+        $(document).ready(
             function() {
                 Backbone.history.start();
-                ctrl.home();
             }
         );
 
