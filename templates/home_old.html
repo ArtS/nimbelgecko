@@ -62,10 +62,11 @@
 	<script src="http://ie7-js.googlecode.com/svn/version/2.0(beta3)/IE8.js"></script>
 	<![endif]-->
 	
-    <script src="/media/js/prototype.js"></script>
-    <script src="/media/js/underscore-min.js"></script>
-    <script src="/media/js/backbone.js"></script>
-	<script src="/media/js/pure/pure_packed.js"></script>
+	<!-- jQuery -->
+    <!--
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+	<script src="/media/js/functions.js"></script>
+    -->
 
 	<!-- Either Modernizr OR the HTML5 Shiv script is required if you want IE compatability, AND you want to use the new, 
 		 more-semantic HTML5 elements (header, article, footer, etc) 
@@ -89,85 +90,72 @@
                 <h2>Tweets</h2>
             </header>
 
+            <% 
+            var tweet,
+                length_cat = cat_names.length,
+                length_j,
+                category,
+                i = 0,
+                j;
+            %>
+
             <section class="nav">
                 <ul>
+                    <% for (i = 0; i < length_cat; i++) { %>
+                    <li><%= cat_names[i] %>&nbsp;(<%= tweets[cat_names[i]].unread_count %>)</li>
+                    <% } %>
                 </ul>
                 <div class="clear"></div>
             </section>
 
             <section class="categories">
+            <% 
+                for (i = 0; i < length_cat; i++) {
+                    category = cat_names[i];
+                    is_visible = tweets[category].unread_count != 0;
+            %>
+            <section class="category" <% if (!is_visible) { %>style="display: none"<% } %>>
 
-                <section class="category">
-
-                            <header>
-                                <div class="left">
-                                    <h3></h3>
-                                </div>
-                                <div class="right">
-                                    <a class="tiny-action" href="#home1">[mark all read]</a>
-                                </div>
-                                <div class="clear"></div>
-                            </header>
-
-                            <div class="tweet">
-                                <span class="text"></span>
-                                <span class="author">
-                                    <a href="http://twitter.com/tweet.user.screen_name/statuses/tweet.id">@tweet.user.screen_name</a>
-                                </span>
+                        <header>
+                            <div class="left">
+                                <h3><%= cat_names[i] %></h3>
                             </div>
-                </section>
-                    <div class="clear"></div>
+                            <div class="right">
+                                <a class="tiny-action" href="/action/mark-all-read/<%= cat_names[i]%>">[mark all read]</a>
+                            </div>
+                            <div class="clear"></div>
+                        </header>
+
+                        <% 
+                        category = tweets[cat_names[i]];
+                        length_j = category.length;
+                        for (j = 0; j < length_j; j++) { 
+                            tweet = category[j];
+                            %>
+                            <div class="tweet">
+                                <span class="text"><%- tweet.escaped_text %></span>
+                                <% if (tweet.user !== undefined) { %>
+                                <span class="author">
+                                    <a href="http://twitter.com/<%= tweet.user.screen_name %>/statuses/<%= tweet.id %>">@<%= tweet.user.screen_name %></a>
+                                </span>
+                                <% } %>
+                            </div>
+                        <% } %>
+                    </section>
+                <% } %>
+                <div class="clear"></div>
             </section>
 
         </section>
-
 	</article>
 	
 	<footer>
+		
 		<p><small>&copy; Copyright NimbleGecko 2010. All Rights Reserved.</small></p>
+		
 	</footer>
 
 </div>
-<script>
-    (function() {
-        /*
-        var m = Backbone.Model.extend({});
-
-        m.bind('newTweets', onNewTweets);
-
-        function onNewTweets(args) {
-            
-        }*/
-
-        var Controller = Backbone.Controller.extend({
-            routes: {
-                'home1': 'home',
-                'actions/mark_read/:id': 'markRead'
-            },
-
-            home: function() {
-                console.log('home');
-            },
-
-            markRead: function(id) {
-                console.log('Mark read: ' + id);
-            }
-        });
-
-        var ctrl = new Controller();
-
-        ctrl.bind('route:home1', function() {console.log('123')});
-
-        document.observe('dom:loaded',
-            function() {
-                Backbone.history.start();
-                ctrl.home();
-            }
-        );
-
-
-    })();
-</script>
 
 </body>
 </html>
