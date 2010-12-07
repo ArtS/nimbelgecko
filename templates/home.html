@@ -81,66 +81,124 @@
 
 <body id="www-domain-com">
 
-<div>
+    <div id="templates" style="display: none;">
+        <div id="sectionTemplate">
 
-	<article>
-        <section>
-            <header>
-                <h2>Tweets</h2>
-            </header>
-
-            <section class="nav">
-                <ul>
-                </ul>
-                <div class="clear"></div>
-            </section>
-
-            <section class="categories">
-
-                <section class="category">
-
-                            <header>
-                                <div class="left">
-                                    <h3></h3>
-                                </div>
-                                <div class="right">
-                                    <a class="tiny-action" href="#home">[home]</a>
-                                    <a class="tiny-action" href="#actions/mark-read/1">[mark all read]</a>
-                                </div>
-                                <div class="clear"></div>
-                            </header>
-
-                            <div class="tweet">
-                                <span class="text"></span>
-                                <span class="author">
-                                    <a href="http://twitter.com/tweet.user.screen_name/statuses/tweet.id">@tweet.user.screen_name</a>
-                                </span>
-                            </div>
-                </section>
+            <section class="category">
+                <header>
+                    <div class="left">
+                        <h3></h3>
+                    </div>
+                    <div class="right">
+                        <a class="tiny-action" href="#actions/mark-read/">[mark all read]</a>
+                    </div>
                     <div class="clear"></div>
+                </header>
+
+                <ul class="list-tweets">
+                    <li class="list-item-tweet">
+                        <span class="text"></span>
+                        <span class="tweet-link">
+                            <a href="">@</a>
+                        </span>
+                    </li>
+                </ul>
+            </section>
+        </div>
+    </div>
+
+    <div>
+        <article>
+            <section>
+                <header>
+                    <h2>Tweets</h2>
+                </header>
+
+                <section class="nav">
+                    <ul>
+                    </ul>
+                    <div class="clear"></div>
+                </section>
+
+                <section id="tweetsSections" class="categories">
+                </section>
+                <div class="clear"></div>
+
             </section>
 
-        </section>
+        </article>
+        
+        <footer>
+            <p><small>&copy; Copyright NimbleGecko 2010. All Rights Reserved.</small></p>
+        </footer>
 
-	</article>
-	
-	<footer>
-		<p><small>&copy; Copyright NimbleGecko 2010. All Rights Reserved.</small></p>
-	</footer>
-
-</div>
+    </div>
 <script>
     (function() {
+
+        var TweetModel = Backbone.Model.extend({
+                            markAsRead: function() {
+                                this.set({is_read: true});
+                            }
+                         }),
+
+            Collection = Backbone.Collection.extend({
+                            model: TweetModel,
+                         }),
+
+            View = Backbone.View.extend({
+
+                templateElem: $('#sectionTemplate'),
+
+                render: function() {
+                    
+                    var directives = {
+                            'section' : {
+
+                                'coll<-collections': {
+                                    'header div.left h3': 'coll.attributes.0',
+                                    'header div.right a.tiny-action@href+': 'coll.attributes.0',
+
+                                    'ul li': {
+                                        'tweet<-coll.attributes.1': {
+                                            'span.text': 'tweet.escaped_text',
+                                            'span.tweet-link a@href':
+                                            'http://twitter.com/#{tweet.user.screen_name}/statuses/#{tweet.id_str}',
+                                            'span.tweet-link a': '@#{tweet.user.screen_name}'
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        compiled = $p(this.templateElem).compile(directives);
+
+                    $(this.el).html(compiled({collections: this.models.toArray()}));
+                }
+            }),
+            ctrl;
+
+        window.view = new View();
+
+        function onTweetsLoaded(data, textStatus) {
+            window.view.models = new Collection(data);
+            window.view.render();
+            $('#tweetsSections').replaceWith(window.view.el);
+        }
+
+        $(document).ready(
+            function() {
+                $.ajax({
+                    url: '/ajax/tweets',
+                    error: function() {
+                        console.log('ajax error');
+                    },
+                    success: onTweetsLoaded 
+                });
+
+            }
+        );
         /*
-        var m = Backbone.Model.extend({});
-
-        m.bind('newTweets', onNewTweets);
-
-        function onNewTweets(args) {
-            
-        }*/
-
-        var Controller = Backbone.Controller.extend({
+        Controller = Backbone.Controller.extend({
             routes: {
                 'home': 'home',
                 'actions/mark-read/:id': 'markRead'
@@ -155,14 +213,14 @@
             }
         });
 
-        var ctrl = new Controller();
+        ctrl = new Controller();
 
         $(document).ready(
             function() {
                 Backbone.history.start();
             }
         );
-
+        */
 
     })();
 </script>

@@ -1,9 +1,11 @@
 var ng = require('ng'),
+    CATEGORY_ME = 'me',
+    CATEGORY_LINK = 'link',
+    CATEGORY_TEXT = 'text',
     CATEGORIES = [
-        'reply',
-        'mention',
-        'link',
-        'text'
+        CATEGORY_ME,
+        CATEGORY_LINK,
+        CATEGORY_TEXT
     ];
 
 
@@ -36,39 +38,32 @@ function tagSingleTweet(tweet, user) {
     // 
     // Categories
     //
-    //  1. Replies to @user
-    //  2. @user being mentioned
-    //  3. links
-    //  4. plain text
+    //  1. Replies to @user / @user being mentioned
+    //  2. links
+    //  3. plain text
     //
     
     var text = tweet.text,
-        user = user || { screen_name: ''};
         str_regex_reply = '^\\@' + user.screen_name + '.*',
         regexReply = new RegExp(str_regex_reply, 'gi'),
         regexMention = new RegExp('^.+\\@' + user.screen_name + '.*', 'gi'),
         regexLink = new RegExp('((?:https?|ftp)://[^\\s]*)', 'gi'),
         isReply = regexReply.test(text),
         isMention = regexMention.test(text),
+        isMe = isReply || isMention,
         isLink = regexLink.test(text),
         isPlainText = !isReply && !isMention && !isLink;
 
-        // console.log(str_regex_reply);
-
-    if (isReply) {
-        return 'reply';
-    }
-
-    if (isMention) {
-        return 'mention';
+    if (isMe) {
+        return CATEGORY_ME;
     }
 
     if (isLink) {
-        return 'link';
+        return CATEGORY_LINK;
     }
 
     if (isPlainText) {
-        return 'text';
+        return CATEGORY_TEXT;
     }
 }
 
@@ -79,6 +74,13 @@ function sortTweets(tweets, user) {
         length = tweets.length,
         i = 0,
         tweet;
+
+    if (!user) {
+        throw {
+            name: 'NoArgumentException',
+            message: 'User is not supplied'
+        }
+    }
 
     for (; i < length; i++) {
         tweet = tweets[i];

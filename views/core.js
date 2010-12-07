@@ -11,11 +11,12 @@ exports.home_old = function(req, res, next) {
             var sorted_tweets;
 
             if (err) {
-                ng.http.error(err, 'Unable to retrieve latest tweets');
+                ng.http.error(req, res, err, 'Unable to retrieve latest tweets');
                 return;
             }
 
             sorted_tweets = ng.sorting.sortTweets(tweets, user);
+            console.log(sorted_tweets.me.length);
 
             next(null, 
                 { 
@@ -28,5 +29,9 @@ exports.home_old = function(req, res, next) {
 };
 
 exports.home = function(req, res, next) {
-    next(null, {});
+    next(null, 
+        {
+            categories: ng.sorting.CATEGORIES
+        }
+    );
 }

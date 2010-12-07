@@ -123,6 +123,7 @@ section.category {
     border-radius: 10px;
     -moz-border-radius: 10px;
     background: lightgray;
+    width: 300px;
 }
 
 /*
@@ -157,11 +158,6 @@ section.nav ul li {
     margin: 0px 5px 0px 5px;
 }
 
-a.tiny-action {
-    font-size: 10px;
-    letter-spacing: 0.7px;
-}
-
 /* End Navigation */
 
 .tagline p {
@@ -193,14 +189,18 @@ a.action-link {
     text-decoration: none;
 }
 
+a.tiny-action {
+    font-size: 10px;
+    letter-spacing: 0.7px;
+}
+
 /* end Links */
 
 p small {
     font-size: 13px;
 }
 
-div.tweet {
-    width: 300px;
+li.list-item-tweet {
     margin: 0px 0px 23px 0px;
     font-size: 13px;
     line-height: 16px;
@@ -216,4 +216,14 @@ div.tweet {
 
 .right {
     float: right;
+}
+
+/*
+ * Lists
+ */
+ul.list-tweets {
+}
+
+ul.list-tweets li.list-item-tweet {
+    list-style: none;
 }
