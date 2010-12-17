@@ -4,18 +4,22 @@ require.paths.unshift('./external');
 require.paths.unshift('./external/node-mongodb-native/lib');
 require.paths.unshift('./external/connect/lib');
 require.paths.unshift('./external/ejs/lib');
+require.paths.unshift('./external/socket.io/lib');
+require.paths.unshift('./external/socket.io-connect');
 require.paths.unshift('./internal');
 require.paths.unshift('.');
 
 
-// JavaScript extensions
+// Language extensions
 require('extensions');
+require('socketIO');
 
 
 var util = require('util'),
     connect = require('connect'),
     ng = require('ng'),
-    urls = require('urls').urls;
+    urls = require('urls').urls,
+    socketIO = require('socket.io');
 
 
 function bindUrls(app, url) {
@@ -66,9 +70,34 @@ function routes(app) {
     }
 }
 
+function setupWebSocket(server, mongoStore) {
+    
+    var socket = socketIO.listen(server),
+        sessionHandler = connect.middleware.session({store: mongoStore});
+
+    socket.on('connection', socket.prefixWithMiddleware(
+        function(client,req, res) {
+            debugger;
+            client.on('message',
+                function(message) {
+                    console.log(message);
+                    client.send({data: 'wtf!'});
+                }
+            );
+            client.on('disconnect',
+                function() {
+                    console.log('disconnected');
+                }
+            );
+        }
+    ));
+}
+
 
 ng.conf.initConfig(
     function(err) {
+        var mongoStore = ng.db.mongoStore();
+
         if(err) {
             ng.log.error(err, 'Config initialisation failed.');
             return;
@@ -77,18 +106,25 @@ ng.conf.initConfig(
         ng.db.initDatabase(['tweets', 'users'],
             //TODO: create separate instance for static files?
             function(err) {
+
+                var server,
+                    io;
+
                 if(err) {
                     ng.log.error(err, 'Database initialisation failed.');
                     return;
                 }
 
-                connect.createServer(
+                server = connect.createServer(
                     connect.bodyDecoder(),
                     connect.cookieDecoder(),
-                    connect.session({ store: ng.db.mongoStore() }),
+                    connect.session({ store: mongoStore }),
                     connect.router(routes),
                     connect.staticProvider('./static')
-                ).listen(8081, '192.168.1.2');
+                );
+                server = server.listen(8081, '192.168.1.2');
+
+                setupWebSocket(server, mongoStore);
             }
         );
     }

@@ -66,6 +66,7 @@
     <script src="/media/js/underscore.js"></script>
     <script src="/media/js/backbone.js"></script>
 	<script src="/media/js/pure/pure_packed.js"></script>
+    <script src="/media/js/socket.io/socket.io.js"></script>
 
 	<!-- Either Modernizr OR the HTML5 Shiv script is required if you want IE compatability, AND you want to use the new, 
 		 more-semantic HTML5 elements (header, article, footer, etc) 
@@ -136,7 +137,8 @@
 <script>
     (function() {
 
-        var TweetModel = Backbone.Model.extend({
+        var socket = new io.Socket(null, {port: 8081, rememberTransport: false}),
+            TweetModel = Backbone.Model.extend({
                             markAsRead: function() {
                                 this.set({is_read: true});
                             }
@@ -187,6 +189,15 @@
 
         $(document).ready(
             function() {
+                socket.on('message',
+                    function() {
+                        console.log(arguments);
+                    }
+                );
+                socket.connect();
+                socket.send({data: 'zomg wtf!'});
+
+                var s = new
                 $.ajax({
                     url: '/ajax/tweets',
                     error: function() {
