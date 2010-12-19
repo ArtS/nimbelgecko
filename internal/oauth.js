@@ -1,5 +1,4 @@
-var conf = require('node-config'),
-    oAuth = require('node-oauth').OAuth,
+var oAuth = require('node-oauth').OAuth,
     URL = require('url'),
     util = require('util'),
     ng = require('ng');
@@ -8,8 +7,8 @@ function getAuth() {
     return new oAuth(
         'https://api.twitter.com/oauth/request_token',
         'https://api.twitter.com/oauth/access_token',
-        conf.oauth_api_key,
-        conf.oauth_secret,
+        ng.conf.oauth_api_key,
+        ng.conf.oauth_secret,
         '1.0',
         null,
         'HMAC-SHA1'
@@ -17,7 +16,7 @@ function getAuth() {
 }
 
 exports.getOAuthRequestToken = function(callback) {
-    getAuth().getOAuthRequestToken({ oauth_callback: conf.oauth_callback_url }, callback);
+    getAuth().getOAuthRequestToken({ oauth_callback: ng.conf.oauth_callback_url }, callback);
 }
 
 exports.getOAuthAccessToken = function(oauth_token, oauth_token_secret, oauth_verifier, callback) {

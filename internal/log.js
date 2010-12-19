@@ -1,12 +1,34 @@
-var util = require('util');
+var util = require('util'),
+    fs = require('fs'),
+    plain_file = fs.createWriteStream(
+        'plain.log',
+        {
+            flags: 'a',
+            encoding: 'utf8'
+        }
+    ),
+    data_file = fs.createWriteStream(
+        'data.log',
+        {
+            flags: 'a',
+            encoding: 'utf8'
+        }
+    ),
+    log_file = fs.createWriteStream(
+        'sys.log',
+        {
+            flags: 'a',
+            encoding: 'utf8'
+        }
+    );
 
 
-exports._inspect = function(obj) {
+function _inspect(obj) {
     util.puts(util.inspect(obj, true, 2));
 }
 
 
-exports.getErrorStr = function(err, message) {
+function getErrorStr(err, message) {
     var _err = null,
         _message = null,
         res = '';
@@ -36,6 +58,30 @@ exports.getErrorStr = function(err, message) {
 }
 
 
-exports.error = function(err, message) {
-    util.log(exports.getErrorStr(err, message));
+function error(err, message) {
+    var errorMsg = getErrorStr(err, message);
+    util.log(errorMsg);
+    log(errorMsg);
 }
+
+
+function plain_log(text) {
+    plain_file.write(text);
+}
+
+
+function log_data(data) {
+    data_file.write(text);
+}
+
+function log(text) {
+    utils.log(text);
+    log_file.write(text);
+}
+
+exports.log = log;
+exports.data = log_data;
+exports._inspect = _inspect;
+exports.plain_log = plain_log;
+exports.error = error;
+exports.getErrorStr = getErrorStr;

@@ -59,4 +59,3 @@ exports.setLoggedInUser = setLoggedInUser;
 exports.getLoggedInUser = getLoggedInUser;
 exports.storeObject = storeObject;
 exports.getObject = getObject;
-
