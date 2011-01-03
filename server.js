@@ -6,11 +6,13 @@ require.paths.unshift('./external');
 require.paths.unshift('./external/node-mongodb-native/lib');
 require.paths.unshift('./external/connect/lib');
 require.paths.unshift('./external/ejs/lib');
-require.paths.unshift('./external/socket.io/lib');
+//require.paths.unshift('./external/socket.io/lib');
 require.paths.unshift('./external/socket.io-connect');
+require.paths.unshift('./external/socket.io-connect/vendor');
 
 // Language extensions
 require('extensions');
+
 require('socketIO');
 
 
@@ -18,7 +20,7 @@ var util = require('util'),
     connect = require('connect'),
     ng = require('ng'),
     urls = require('urls').urls,
-    socketIO = require('socket.io');
+    socketIO = require('socket.io-node');
 
 
 function bindUrls(app, url) {
@@ -71,8 +73,7 @@ function routes(app) {
 
 function setupWebSocket(server, mongoStore) {
     
-    var socket = socketIO.listen(server),
-        sessionHandler = connect.middleware.session({store: mongoStore});
+    var socket = socketIO.listen(server);
 
     socket.on('connection', socket.prefixWithMiddleware(
         function(client,req, res) {
@@ -94,6 +95,7 @@ function setupWebSocket(server, mongoStore) {
 
 
 ng.conf.initConfig(
+
     function(err) {
         var mongoStore = ng.db.mongoStore();
 

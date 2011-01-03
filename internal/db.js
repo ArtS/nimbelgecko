@@ -12,6 +12,7 @@ var mongo = require('node-mongodb-native/lib/mongodb'),
     models = require('models'),
     USERS_COLLECTION = 'users',
     TWEETS_COLLECTION = 'tweets',
+    OTHER_COLLECTION = 'other',
     collections = {};
 
 
@@ -50,9 +51,45 @@ function _updateExistingUser(params, doc, callback) {
         doc, 
         function(err, docs) {
             if(err) {
-                return callback(err);
+                callback(err);
+                return;
             }
-            return callback(null);
+
+            callback(null);
+        }
+    );
+}
+
+
+function saveUnknown(item, callback) {
+    var col = collections[OTHER_COLLECTION];
+    col.insert(item, callback);
+}
+
+function saveTweet(tweet, callback) {
+
+    var col = collections[TWEETS_COLLECTION];
+
+    col.find(
+        { id_str: tweet.id_str }, {},
+        function(err, cursor) {
+
+            if(err) {
+                callback(err);
+                return;
+            }
+
+            cursor.toArray(
+
+                function(err, arr) {
+
+                    if(arr.length != 0) {
+                        return;
+                    }
+
+                    col.insert(tweet, callback);
+                }
+            ); 
         }
     );
 }
@@ -168,3 +205,5 @@ exports.collections = collections;
 exports.initDatabase = initDatabase;
 exports.saveUserDetails = saveUserDetails;
 exports.getRecentTweets = getRecentTweets;
+exports.saveUnknown = saveUnknown;
+exports.saveTweet = saveTweet;

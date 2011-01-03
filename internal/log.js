@@ -1,5 +1,6 @@
 var util = require('util'),
     fs = require('fs'),
+    util = require('util'),
     plain_file = fs.createWriteStream(
         'plain.log',
         {
@@ -60,7 +61,6 @@ function getErrorStr(err, message) {
 
 function error(err, message) {
     var errorMsg = getErrorStr(err, message);
-    util.log(errorMsg);
     log(errorMsg);
 }
 
@@ -71,11 +71,11 @@ function plain_log(text) {
 
 
 function log_data(data) {
-    data_file.write(text);
+    data_file.write(data);
 }
 
 function log(text) {
-    utils.log(text);
+    util.log(text);
     log_file.write(text);
 }
 

@@ -17,7 +17,7 @@ function oAuthGet(url, params, callback) {
         'https://api.twitter.com/oauth/access_token',
         ng.conf.oauth_api_key,
         ng.conf.oauth_secret,
-        '1.0',
+        '1.0A',
         null,
         'HMAC-SHA1'
     );

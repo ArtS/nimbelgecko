@@ -25,3 +25,6 @@
 [submodule "external/socket.io-connect"]
 	path = external/socket.io-connect
 	url = https://github.com/bnoguchi/Socket.IO-connect.git
+[submodule "external/underscore"]
+	path = external/underscore
+	url = http://github.com/documentcloud/underscore.git
