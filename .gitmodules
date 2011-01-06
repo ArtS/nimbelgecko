@@ -28,3 +28,6 @@
 [submodule "external/underscore"]
 	path = external/underscore
 	url = http://github.com/documentcloud/underscore.git
+[submodule "external/node-chain"]
+	path = external/node-chain
+	url = git@github.com:ArtS/node-chain.git
