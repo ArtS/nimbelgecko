@@ -8,12 +8,12 @@ require.paths.unshift('./external/underscore');
 require.paths.unshift('./external/node-mongodb-native/lib');
 require.paths.unshift('./external/connect/lib');
 
-
 require('underscore');
 
 
 var ng = require('ng'),
     util = require('util'),
+    runChain = require('node-chain').runChain,
     chain,
     STREAM_CHECK_INTERVAL = 60000;
 
@@ -104,9 +104,11 @@ function handleChunk(chunk) {
 }
 
 
-function startStreaming() {
+function startStreaming(allUserIds) {
 
-    var req = ng.twitter.startStreaming([20937471]),
+    console.log('Starting stream for ' + allUserIds);
+
+    var req = ng.twitter.startStreaming(allUserIds),
         markedForDestruction = false,
         res;
 
@@ -117,12 +119,27 @@ function startStreaming() {
 
     function streamWatcher() {
         if (markedForDestruction) {
-            console.log('This stream has been unresponsive, restarting...');
-            res.end();
+            ng.log.log('This stream has been unresponsive, restarting...');
+            res.destroy();
         } else {
             markedForDestruction = true;
             setTimeout(streamWatcher, STREAM_CHECK_INTERVAL);
         }
+    }
+
+    function onStreamError() {
+        ng.log.log('Error in stream!');
+        process.nextTick(startStreaming);
+    }
+
+    function onStreamClose() {
+        ng.log.log('Stream closed!');
+        process.nextTick(startStreaming);
+    }
+
+    function onStreamEnd() {
+        ng.log.log('Stream end!');
+        process.nextTick(startStreaming);
     }
 
     req.addListener('response',
@@ -135,32 +152,14 @@ function startStreaming() {
 
             res.addListener('data', 
                 function(chunk) {
-                    util.log('Data');
                     markedForDestruction = false;
                     handleChunk(chunk);
                 }
             );
 
-            res.addListener('end',
-                function() {
-                    var a,
-                        arg_arr = Array.prototype.splice(arguments);
-
-                    console.log('!!! Error in response stream !!!');
-                    for (a in arg_arr) {
-                        console.log(a + ': ' + arg_arr[a]);
-                    }
-
-                    res.end();
-                }
-            );
-
-            res.addListener('end',
-                function() {
-                    console.log('------[ end ]------');
-                    setTimeout(startStreaming, 0);
-                }
-            );
+            res.socket.addListener('error', onStreamError);
+            res.socket.addListener('close', onStreamClose);
+            res.socket.addListener('end', onStreamEnd);
 
             streamWatcher();
         }
@@ -170,38 +169,6 @@ function startStreaming() {
 }
 
 
-function runChain(chain, index) {
-    var i = index || 0,
-        currRing = chain[i],
-        currArgs = [];
-
-    function checkErrorCallback(err) {
-
-        console.log('Got callback for chain N ' + i);
-
-        if (err) {
-            ng.log.error(currRing.errorMessage);
-            return;
-        }
-
-        i += 1;
-        runChain(chain, i);
-    }
-
-    if (currRing.args) {
-        _(currRing.args).each(function(e) {
-            currArgs.push(e);
-        });
-    }
-
-    if (i != chain.length-1) {
-        currArgs.push(checkErrorCallback);
-    }
-
-    console.log('Running chain N ' + i);
-    currRing.target.apply(this, currArgs);
-}
-
 chain = [
     {
         target: ng.conf.initConfig,
@@ -209,12 +176,19 @@ chain = [
     },
     {
         target: ng.db.initDatabase,
-        errorMessage: 'Database initialisation failed.',
-        args: [['tweets', 'users', 'other']]
+        args: [['tweets', 'users', 'other']],
+        errorMessage: 'Database initialisation failed.'
     },
     {
-        target: startStreaming
+        target: ng.db.getAllUserIds,
+        errorMessage: 'Error obtaining all user IDs',
+        passResultToNextStep: true
+    },
+    {
+        target: startStreaming,
+        errorMessage: 'Error when starting receiving stream'
     }
 ];
+
 
 runChain(chain);

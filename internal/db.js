@@ -95,6 +95,38 @@ function saveTweet(tweet, callback) {
 }
 
 
+function getAllUserIds(callback) {
+
+    var users = collections[USERS_COLLECTION];
+
+    users.find(
+        function(err, cursor) {
+            cursor.toArray(
+                function(err, arr) {
+                    var res = [],
+                        i = 0,
+                        length;
+
+                    if (err) {
+                        callback(err);
+                        return;
+                    }
+                    
+                    length = arr.length;
+                    for (; i < length; i++) {
+                        if (arr[i].user_id) {
+                            res.push(arr[i].user_id);
+                        }
+                    }
+
+                    callback(null, res);
+                }
+            );
+        }
+    );
+}
+
+
 function saveUserDetails(params, callback) {
 
     var users = collections[USERS_COLLECTION];
@@ -198,7 +230,10 @@ function getRecentTweets(user_id, callback) {
     );
 }
 
+
+//
 // Exports
+//
 
 exports.mongoStore = mongoStore;
 exports.collections = collections;
@@ -207,3 +242,4 @@ exports.saveUserDetails = saveUserDetails;
 exports.getRecentTweets = getRecentTweets;
 exports.saveUnknown = saveUnknown;
 exports.saveTweet = saveTweet;
+exports.getAllUserIds = getAllUserIds;
