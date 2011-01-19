@@ -1,27 +1,25 @@
-var data = '';
+function tryToGetPiece(buffer) {
 
-function tryToGetPiece() {
-
-    var length = data.length,
+    var length = buffer.data.length,
         i = 0,
         opened = 0,
         modified = false,
         solid_piece;
     
     for (; i < length; i++) {
-        if (data[i] == '{') {
+        if (buffer.data[i] == '{') {
             opened++;
             modified = true;
         }
-        if (data[i] == '}') {
+        if (buffer.data[i] == '}') {
             opened--;
             modified = true;
         }
 
         if (modified && opened === 0) {
-            solid_piece = data.substr(0, i + 1);
+            solid_piece = buffer.data.substr(0, i + 1);
 
-            data = data.substr(i + 1);
+            buffer.data = buffer.data.substr(i + 1);
 
             return solid_piece;
         }
@@ -30,15 +28,15 @@ function tryToGetPiece() {
     return null;
 }
 
-function glueChunksOrKeepCalm(chunk) {
+function glueChunksOrKeepCalm(buffer) {
 
     var res = [],
         solid_piece;
 
-    data += chunk;
+    buffer.data += buffer.chunk;
 
     while(true) {
-        solid_piece = tryToGetPiece();
+        solid_piece = tryToGetPiece(buffer);
         if (solid_piece === null) {
             break;
         }

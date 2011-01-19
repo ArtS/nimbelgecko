@@ -12,90 +12,28 @@ require('underscore');
 
 
 var ng = require('ng'),
-    util = require('util'),
     runChain = require('node-chain').runChain,
-    chain,
+    init_chain,
     STREAM_CHECK_INTERVAL = 60000;
 
 
-function isFieldPresent(elem, field_name) {
+function handleChunk(buffer) {
 
-    if (elem[field_name] === undefined ||
-        elem[field_name] === null) {
-
-        return false;
+    if (buffer.chunk) {
+        ng.log.data(buffer.chunk);
     }
 
-    return true;
-}
-
-
-function handleParsedElem(elem) {
-
-    var msg;
-    
-    if (!isFieldPresent(elem, 'for_user')) {
-        ng.log.error('No \'for_user\' field found in ' + JSON.stringify(elem));
-        return;
-    }
-
-    if (!isFieldPresent(elem, 'message')) {
-        ng.log.error('No \'message\' field found in ' + JSON.stringify(elem));
-        return;
-    }
-
-    msg = elem.message;
-    msg.owner_id = String(elem.for_user);
-
-    if(msg.user !== undefined &&
-       msg.text !== undefined) {
-
-        msg.is_read = false;
-
-        ng.db.saveTweet(msg, 
-            function(err) {
-                if (err) {
-                    ng.log.error(err, 'Error while saving a tweet');
-                }
-            }
-        );
-
-        util.log('Saved tweet: \n' +
-                 msg.user.screen_name +': ' + 
-                 msg.text);
-    } else {
-        // Unknown type of message
-        ng.db.saveUnknown(msg, 
-            function(err) {
-                if (err) {
-                    ng.log.error(err, 'Error while saving an unknown entity.');
-                }
-            }
-        );
-        util.log('Saved unknown: ' + JSON.stringify(msg));
-    }
-}
-
-
-function handleChunk(chunk) {
-
-    if (chunk) {
-        ng.log.data(chunk);
-    }
-
-    pieces = ng.glue.glueChunksOrKeepCalm(chunk);
+    pieces = ng.glue.glueChunksOrKeepCalm(buffer);
 
     if (!pieces) {
         return;
     }
 
     _(pieces).each(
-
         function(piece) {
-
             try {
                 js_piece = JSON.parse(piece);
-                handleParsedElem(js_piece);
+                ng.db.saveStreamItem(js_piece);
             } catch (err){
                 ng.log.error('error: ' + err);
             }
@@ -110,36 +48,55 @@ function startStreaming(allUserIds) {
 
     var req = ng.twitter.startStreaming(allUserIds),
         markedForDestruction = false,
-        res;
+        res,
+        buffer = {
+            data: '',
+            chunk: ''
+        };
 
     if (!req) {
         ng.log.error('Error while starting streaming.');
         return;
     }
 
+
     function streamWatcher() {
+
         if (markedForDestruction) {
             ng.log.log('This stream has been unresponsive, restarting...');
-            res.destroy();
+
+            // Restart receiver
+            process.nextTick(runStreamingChain);
+            
+            // Shutdown current receiver
+            process.nextTick(
+                function() {
+                    res.destroy();
+                }
+            );
+
         } else {
             markedForDestruction = true;
             setTimeout(streamWatcher, STREAM_CHECK_INTERVAL);
         }
     }
 
+
     function onStreamError() {
         ng.log.log('Error in stream!');
-        process.nextTick(startStreaming);
+
+        markedForDestruction = true;
+        streamWatcher();
     }
+
 
     function onStreamClose() {
         ng.log.log('Stream closed!');
-        process.nextTick(startStreaming);
     }
+
 
     function onStreamEnd() {
         ng.log.log('Stream end!');
-        process.nextTick(startStreaming);
     }
 
     req.addListener('response',
@@ -153,7 +110,8 @@ function startStreaming(allUserIds) {
             res.addListener('data', 
                 function(chunk) {
                     markedForDestruction = false;
-                    handleChunk(chunk);
+                    buffer.chunk = chunk;
+                    handleChunk(buffer);
                 }
             );
 
@@ -168,8 +126,23 @@ function startStreaming(allUserIds) {
     req.end();
 }
 
+function runStreamingChain() {
+    var stream_chain = [
+        {
+            target: ng.db.getAllUserIds,
+            errorMessage: 'Error obtaining all user IDs',
+            passResultToNextStep: true
+        },
+        {
+            target: startStreaming,
+            errorMessage: 'Error when starting receiving stream'
+        }
+    ];
+    
+    runChain(stream_chain);
+}
 
-chain = [
+init_chain = [
     {
         target: ng.conf.initConfig,
         errorMessage: 'Unable to init the config'
@@ -180,15 +153,9 @@ chain = [
         errorMessage: 'Database initialisation failed.'
     },
     {
-        target: ng.db.getAllUserIds,
-        errorMessage: 'Error obtaining all user IDs',
-        passResultToNextStep: true
-    },
-    {
-        target: startStreaming,
-        errorMessage: 'Error when starting receiving stream'
+        target: runStreamingChain,
+        errorMessage: 'Error starting streaming'
     }
 ];
 
-
-runChain(chain);
+runChain(init_chain);

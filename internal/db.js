@@ -1,4 +1,5 @@
 var mongo = require('node-mongodb-native/lib/mongodb'),
+    ng = require('ng'),
     db = new mongo.Db(
         'nimblegecko',
         new mongo.Server(
@@ -203,7 +204,7 @@ function getRecentTweets(user_id, callback) {
 
     col.find(
         { 
-            owner_id: user_id 
+            for_user: user_id 
         },
         { 
             limit: 300,
@@ -231,6 +232,67 @@ function getRecentTweets(user_id, callback) {
 }
 
 
+function _isFieldPresent(elem, field_name) {
+
+    if (elem[field_name] === undefined ||
+        elem[field_name] === null) {
+
+        return false;
+    }
+
+    return true;
+}
+
+
+// 
+// Saves either a tweet or an unknown object.
+// Invoked from the stream receiving routine
+//
+function saveStreamItem(item) {
+
+    var msg;
+    
+    if (!_isFieldPresent(item, 'for_user')) {
+        ng.log.error('No \'for_user\' field found in ' + JSON.stringify(item));
+        return;
+    }
+
+    if (!_isFieldPresent(item, 'message')) {
+        ng.log.error('No \'message\' field found in ' + JSON.stringify(item));
+        return;
+    }
+
+    msg = item.message;
+
+    if(msg.user !== undefined &&
+       msg.text !== undefined) {
+
+        msg.is_read = false;
+
+        saveTweet(msg, 
+            function(err) {
+                if (err) {
+                    ng.log.error(err, 'Error while saving a tweet');
+                }
+            }
+        );
+
+        ng.log.log('Saved tweet: \n' +
+                 msg.user.screen_name +': ' + 
+                 msg.text);
+    } else {
+        // Unknown type of message
+        saveUnknown(msg, 
+            function(err) {
+                if (err) {
+                    ng.log.error(err, 'Error while saving an unknown entity.');
+                }
+            }
+        );
+        ng.log.log('Saved unknown: ' + JSON.stringify(msg));
+    }
+}
+
 //
 // Exports
 //
@@ -243,3 +305,4 @@ exports.getRecentTweets = getRecentTweets;
 exports.saveUnknown = saveUnknown;
 exports.saveTweet = saveTweet;
 exports.getAllUserIds = getAllUserIds;
+exports.saveStreamItem = saveStreamItem;
