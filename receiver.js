@@ -12,43 +12,26 @@ require('underscore');
 
 
 var ng = require('ng'),
+    EventEmitter = require('events').EventEmitter,
     runChain = require('node-chain').runChain,
     init_chain,
     STREAM_CHECK_INTERVAL = 60000;
 
 
-function handleChunk(buffer) {
+// TODO: Mix in with EventEmitter and handle external things like restart 
+// of ReceivingSignal from outside, listening on 'end' event of it
+function ReceivingStream(allUserIds) {
 
-    if (buffer.chunk) {
-        ng.log.data(buffer.chunk);
+    if (!(this instanceof ReceivingStream)) {
+        return new ReceivingStream(allUserIds);
     }
 
-    pieces = ng.glue.glueChunksOrKeepCalm(buffer);
-
-    if (!pieces) {
-        return;
-    }
-
-    _(pieces).each(
-        function(piece) {
-            try {
-                js_piece = JSON.parse(piece);
-                ng.db.saveStreamItem(js_piece);
-            } catch (err){
-                ng.log.error('error: ' + err);
-            }
-        }
-    );
-}
-
-
-function startStreaming(allUserIds) {
-
-    console.log('Starting stream for ' + allUserIds);
+    ng.log.log('Starting receiving stream for ' + allUserIds);
 
     var req = ng.twitter.startStreaming(allUserIds),
-        markedForDestruction = false,
-        res,
+        _allUserIds = allUserIds,
+        watcher = new ng.watcher.Watcher(this, STREAM_CHECK_INTERVAL),
+        streamRes,
         buffer = {
             data: '',
             chunk: ''
@@ -56,75 +39,89 @@ function startStreaming(allUserIds) {
 
     if (!req) {
         ng.log.error('Error while starting streaming.');
-        return;
+        throw 'Error while starting streaming.';
     }
 
-
-    function streamWatcher() {
-
-        if (markedForDestruction) {
-            ng.log.log('This stream has been unresponsive, restarting...');
-
-            // Restart receiver
-            process.nextTick(runStreamingChain);
-            
-            // Shutdown current receiver
-            process.nextTick(
-                function() {
-                    res.destroy();
-                }
-            );
-
-        } else {
-            markedForDestruction = true;
-            setTimeout(streamWatcher, STREAM_CHECK_INTERVAL);
-        }
-    }
-
-
-    function onStreamError() {
-        ng.log.log('Error in stream!');
-
-        markedForDestruction = true;
-        streamWatcher();
-    }
-
-
-    function onStreamClose() {
-        ng.log.log('Stream closed!');
-    }
-
-
-    function onStreamEnd() {
-        ng.log.log('Stream end!');
-    }
+    this.on('restart', onRestart.bind(this));
 
     req.addListener('response',
 
         function(response) {
+            streamRes = response;
+            streamRes.setEncoding('utf8');
+            streamRes.addListener('data', onData);
 
-            res = response;
+            streamRes.socket.addListener('error', onStreamError.bind(this));
+            streamRes.socket.addListener('close', onStreamClose.bind(this));
+            streamRes.socket.addListener('end', onStreamEnd.bind(this));
 
-            res.setEncoding('utf8');
-
-            res.addListener('data', 
-                function(chunk) {
-                    markedForDestruction = false;
-                    buffer.chunk = chunk;
-                    handleChunk(buffer);
-                }
-            );
-
-            res.socket.addListener('error', onStreamError);
-            res.socket.addListener('close', onStreamClose);
-            res.socket.addListener('end', onStreamEnd);
-
-            streamWatcher();
+            watcher.startWatching();
         }
     );
 
     req.end();
+
+    //
+    // Private functions 
+    //
+
+    function onRestart() {
+        process.nextTick(runStreamingChain);
+        streamRes.destroy();
+    }
+
+    function onStreamClose() { ng.log.log('Stream closed.'); }
+
+    function onStreamEnd() { ng.log.log('Stream end.'); }
+
+    function onStreamError() {
+        ng.log.error('Error in stream!');
+        this.restart();
+    }
+
+    function onData(chunk) {
+        // Calm down the Watcher, but only for the next check
+        this.markedForDestruction = false;
+        processReceivedData(chunk);
+    }
+
+    function processReceivedData(chunk) {
+
+        if (chunk) { ng.log.data(chunk); }
+
+        pieces = ng.glue.glueChunksOrKeepCalm(buffer, chunk);
+        if (!pieces) {
+            return;
+        }
+
+        _(pieces).each(
+            function(piece) {
+                try {
+                    js_piece = JSON.parse(piece);
+                    ng.db.saveStreamItem(js_piece);
+                } catch (err){
+                    ng.log.error('error: ' + err);
+                }
+            }
+        );
+    }
+
+    //
+    // Public members.
+    //
+
+    this.markedForDestruction = false;
 }
+
+
+ReceivingStream.prototype = new EventEmitter();
+
+
+function startReceivingStream(allUserIds) {
+    var stream = new ReceivingStream(allUserIds);
+    stream.on('restart', runStreamingChain);
+}
+
 
 function runStreamingChain() {
     var stream_chain = [
@@ -134,14 +131,19 @@ function runStreamingChain() {
             passResultToNextStep: true
         },
         {
-            target: startStreaming,
+            target: startReceivingStream,
             errorMessage: 'Error when starting receiving stream'
         }
     ];
-    
+
     runChain(stream_chain);
 }
 
+
+//
+// Inits config engine, database and then kicks off
+// receiving stream
+//
 init_chain = [
     {
         target: ng.conf.initConfig,

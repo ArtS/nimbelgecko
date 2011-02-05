@@ -28,12 +28,12 @@ function tryToGetPiece(buffer) {
     return null;
 }
 
-function glueChunksOrKeepCalm(buffer) {
+function glueChunksOrKeepCalm(buffer, chunk) {
 
     var res = [],
         solid_piece;
 
-    buffer.data += buffer.chunk;
+    buffer.data += chunk;
 
     while(true) {
         solid_piece = tryToGetPiece(buffer);

@@ -8,6 +8,7 @@ exports.http = require('http_tools');
 exports.sorting = require('sorting');
 exports.twitter = require('twitter');
 exports.glue = require('glue');
+exports.watcher = require('watcher');
 
 exports.log = require('log');
 exports.session = require('session');
