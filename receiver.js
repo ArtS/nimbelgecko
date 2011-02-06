@@ -42,8 +42,6 @@ function ReceivingStream(allUserIds) {
         throw 'Error while starting streaming.';
     }
 
-    this.on('restart', onRestart.bind(this));
-
     req.addListener('response',
 
         function(response) {
@@ -71,7 +69,7 @@ function ReceivingStream(allUserIds) {
 
     function onStreamError() {
         ng.log.error('Error in stream!');
-        onRestart();
+        shutdown();
     }
 
     function onData(chunk) {
