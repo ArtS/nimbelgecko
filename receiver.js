@@ -62,13 +62,8 @@ function ReceivingStream(allUserIds) {
     req.end();
 
     //
-    // Private functions 
+    // Event handlers
     //
-
-    function onRestart() {
-        process.nextTick(runStreamingChain);
-        streamRes.destroy();
-    }
 
     function onStreamClose() { ng.log.log('Stream closed.'); }
 
@@ -76,12 +71,12 @@ function ReceivingStream(allUserIds) {
 
     function onStreamError() {
         ng.log.error('Error in stream!');
-        this.restart();
+        onRestart();
     }
 
     function onData(chunk) {
-        // Calm down the Watcher, but only for the next check
-        this.markedForDestruction = false;
+        // Let watcher know that we're still alive
+        watcher.ping();
         processReceivedData(chunk);
     }
 
@@ -106,11 +101,11 @@ function ReceivingStream(allUserIds) {
         );
     }
 
-    //
-    // Public members.
-    //
-
-    this.markedForDestruction = false;
+    this.shutdown = function() {
+        process.nextTick(runStreamingChain);
+        streamRes.destroy();
+        this.emit('shutdown');
+    }
 }
 
 
@@ -119,7 +114,7 @@ ReceivingStream.prototype = new EventEmitter();
 
 function startReceivingStream(allUserIds) {
     var stream = new ReceivingStream(allUserIds);
-    stream.on('restart', runStreamingChain);
+    stream.on('shutdown', runStreamingChain);
 }
 
 
