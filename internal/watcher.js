@@ -12,7 +12,7 @@ function Watcher(instance, interval) {
     }
 
 
-    this.checkIsAlive = function() {
+    checkIsAlive = function() {
         if (_markedForDestruction) {
             ng.log.log('Watcher detected that object is flaky, restarting...');
             _instance.shutdown();
@@ -24,7 +24,7 @@ function Watcher(instance, interval) {
 
 
     this.startWatching = function() {
-        checkIsAlive();
+        this.checkIsAlive();
     }
 
 
