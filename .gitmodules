@@ -22,12 +22,12 @@
 [submodule "external/node-comet"]
 	path = external/node-comet
 	url = https://github.com/eculver/node_comet.git
-[submodule "external/socket.io-connect"]
-	path = external/socket.io-connect
-	url = https://github.com/bnoguchi/Socket.IO-connect.git
 [submodule "external/underscore"]
 	path = external/underscore
 	url = http://github.com/documentcloud/underscore.git
 [submodule "external/node-chain"]
 	path = external/node-chain
 	url = git@github.com:ArtS/node-chain.git
+[submodule "external/socket.io-connect"]
+    path = external/socket.io-connect
+    url = https://github.com/bnoguchi/Socket.IO-connect.git

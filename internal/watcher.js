@@ -24,7 +24,7 @@ function Watcher(instance, interval) {
 
 
     this.startWatching = function() {
-        checkIsAlive();
+        this.scheckIsAlive();
     }
 
 
