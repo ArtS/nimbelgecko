@@ -116,14 +116,17 @@ function startReceivingStream(allUserIds) {
 }
 
 
+//
+// Starts receiving stream from twitter
+//
 function runStreamingChain() {
     var stream_chain = [
         {
             target: ng.db.getAllUserIds,
             errorMessage: 'Error obtaining all user IDs',
             passResultToNextStep: true
-        },
-        {
+        }
+      , {
             target: startReceivingStream,
             errorMessage: 'Error when starting receiving stream'
         }

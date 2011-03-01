@@ -71,7 +71,7 @@ function routes(app) {
 }
 
 function setupWebSocket(server, mongoStore) {
-    
+
     var socket = socketIO.listen(server);
 
     socket.on('connection', socket.prefixWithMiddleware(

@@ -16,9 +16,6 @@
 [submodule "external/node-oauth"]
     path = external/node-oauth
     url = http://github.com/ciaranj/node-oauth.git
-[submodule "external/socket.io"]
-	path = external/socket.io
-	url = https://github.com/LearnBoost/Socket.IO-node.git
 [submodule "external/node-comet"]
 	path = external/node-comet
 	url = https://github.com/eculver/node_comet.git
