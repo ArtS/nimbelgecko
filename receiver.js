@@ -1,118 +1,120 @@
 #!/usr/bin/env node
 
 
-require.paths.unshift('.');
-require.paths.unshift('./internal');
-require.paths.unshift('./external');
-require.paths.unshift('./external/underscore');
-require.paths.unshift('./external/node-mongodb-native/lib');
-require.paths.unshift('./external/connect/lib');
+require.paths.unshift('.')
+require.paths.unshift('./internal')
+require.paths.unshift('./external')
+require.paths.unshift('./external/underscore')
+require.paths.unshift('./external/node-mongodb-native/lib')
+require.paths.unshift('./external/connect/lib')
 
-require('underscore');
+require('underscore')
 
 
 var ng = require('ng'),
     EventEmitter = require('events').EventEmitter,
     runChain = require('node-chain').runChain,
     init_chain,
-    STREAM_CHECK_INTERVAL = 60000;
+    STREAM_CHECK_INTERVAL = 60000
 
 
-// TODO: Mix in with EventEmitter and handle external things like restart 
-// of ReceivingSignal from outside, listening on 'end' event of it
 function ReceivingStream(allUserIds) {
 
     if (!(this instanceof ReceivingStream)) {
-        return new ReceivingStream(allUserIds);
+        return new ReceivingStream(allUserIds)
     }
 
-    ng.log.log('Starting receiving stream for ' + allUserIds);
+    ng.log.log('Starting receiving stream for ' + allUserIds)
 
     var req = ng.twitter.startStreaming(allUserIds),
         _allUserIds = allUserIds,
-        watcher = new ng.watcher.Watcher(this, STREAM_CHECK_INTERVAL),
         streamRes,
         buffer = {
             data: '',
             chunk: ''
-        };
+        }
 
     if (!req) {
-        ng.log.error('Error while starting streaming.');
-        throw 'Error while starting streaming.';
+        ng.log.error('Error while starting streaming.')
+        throw 'Error while starting streaming.'
     }
 
     req.addListener('response',
 
         function(response) {
-            streamRes = response;
-            streamRes.setEncoding('utf8');
-            streamRes.addListener('data', onData);
 
-            streamRes.socket.addListener('error', onStreamError.bind(this));
-            streamRes.socket.addListener('close', onStreamClose.bind(this));
-            streamRes.socket.addListener('end', onStreamEnd.bind(this));
+            streamRes = response
+            streamRes.setEncoding('utf8')
+            streamRes.addListener('data', onData.bind(this))
 
-            watcher.startWatching();
-        }
-    );
+            streamRes.socket.addListener('error', onStreamError.bind(this))
+            streamRes.socket.addListener('close', onStreamClose.bind(this))
+            streamRes.socket.addListener('end', onStreamEnd.bind(this))
 
-    req.end();
+            this.emit('stream_ready')
+
+        }.bind(this)
+    )
+
+    req.end()
 
     //
     // Event handlers
     //
 
-    function onStreamClose() { ng.log.log('Stream closed.'); }
-
-    function onStreamEnd() { ng.log.log('Stream end.'); }
-
-    function onStreamError() {
-        ng.log.error('Error in stream!');
-        shutdown();
-    }
+    function onStreamClose() { ng.log.log('Stream closed.') }
+    function onStreamEnd() { ng.log.log('Stream end.') }
+    function onStreamError() { ng.log.error('Error in stream!') }
 
     function onData(chunk) {
-        // Let watcher know that we're still alive
-        watcher.ping();
-        processReceivedData(chunk);
+        //ng.log.log("Some data from twitter...")
+        this.emit('data_arrvied')
+        processReceivedData(chunk)
     }
 
     function processReceivedData(chunk) {
 
-        if (chunk) { ng.log.data(chunk); }
+        if (chunk) { ng.log.data(chunk) }
 
-        pieces = ng.glue.glueChunksOrKeepCalm(buffer, chunk);
+        pieces = ng.glue.glueChunksOrKeepCalm(buffer, chunk)
         if (!pieces) {
-            return;
+            return
         }
 
         _(pieces).each(
             function(piece) {
                 try {
-                    js_piece = JSON.parse(piece);
-                    ng.db.saveStreamItem(js_piece);
+                    js_piece = JSON.parse(piece)
+                    ng.db.saveStreamItem(js_piece)
                 } catch (err){
-                    ng.log.error('error: ' + err);
+                    ng.log.error('error: ' + err)
                 }
             }
-        );
+        )
     }
 
     this.shutdown = function() {
-        process.nextTick(runStreamingChain);
-        streamRes.destroy();
-        this.emit('shutdown');
+        /*
+        console.dir(this)
+        console.dir(streamRes)
+        console.dir(_allUserIds)
+        */
+        streamRes.destroy()
+        this.emit('shutdown')
     }
 }
 
 
-ReceivingStream.prototype = new EventEmitter();
+ReceivingStream.prototype = new EventEmitter()
 
 
 function startReceivingStream(allUserIds) {
-    var stream = new ReceivingStream(allUserIds);
-    stream.on('shutdown', runStreamingChain);
+    var stream = new ReceivingStream(allUserIds),
+        watcher = new ng.watcher.Watcher(STREAM_CHECK_INTERVAL)
+
+    stream.on('stream_ready', function() { watcher.startWatching(stream) } )
+    stream.on('data_arrvied', function() { watcher.keepAlive() } )
+    stream.on('shutdown', runStreamingChain)
 }
 
 
@@ -130,15 +132,15 @@ function runStreamingChain() {
             target: startReceivingStream,
             errorMessage: 'Error when starting receiving stream'
         }
-    ];
+    ]
 
-    runChain(stream_chain);
+    runChain(stream_chain)
 }
 
 
 //
 // Inits config engine, database and then kicks off
-// receiving stream
+// receiving stream initialisation chain
 //
 init_chain = [
     {
@@ -154,6 +156,6 @@ init_chain = [
         target: runStreamingChain,
         errorMessage: 'Error starting streaming'
     }
-];
+]
 
-runChain(init_chain);
+runChain(init_chain)

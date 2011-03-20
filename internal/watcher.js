@@ -1,43 +1,40 @@
 
 var ng = require('ng')
 
-var Watcher = (function() {
+var Watcher = function(interval) {
 
-    var _instance
-      , _interval
-      , _markedForDestruction = false
-
-    function constructor(instance, interval) {
-
-        if (!(this instanceof constructor)) {
-            return new constructor(instance, interval)
-        }
-
-        _instance = instance
-        _interval = interval
+    if (!(this instanceof Watcher)) {
+        return new Watcher(interval)
     }
 
-    function checkIsAlive() {
+    var _instance
+      , _interval = interval
+      , _markedForDestruction = false
+
+
+    this.checkIsAlive = function() {
         if (_markedForDestruction) {
             ng.log.log('Watcher detected that object is flaky, restarting...')
             _instance.shutdown()
         } else {
+            //ng.log.log('Watcher is being kept alive, next check in ' + _interval)
             _markedForDestruction = true
-            setTimeout(checkIsAlive, _interval)
+            setTimeout(this.checkIsAlive.bind(this), _interval)
         }
     }
 
-    constructor.prototype.startWatching = function() {
-        checkIsAlive()
+
+    this.startWatching = function(instance) {
+        _instance = instance
+        this.checkIsAlive()
     }
 
-    constructor.prototype.ping = function() {
+
+    this.keepAlive = function() {
+        //ng.log.log("Watcher is nudged")
         _markedForDestruction = false
     }
-
-    return constructor
-
-})()
+}
 
 
 exports.Watcher = Watcher

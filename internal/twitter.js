@@ -50,7 +50,7 @@ function oAuthGet(url, params, callback) {
 
 
 function retrieveTweets(params, callback) {
-    
+
     var url_params = params || {};
 
     if((params != null && typeof params != "undefined") && (params.since_id != null)) {

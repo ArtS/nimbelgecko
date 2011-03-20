@@ -76,6 +76,7 @@ function log_data(data) {
 
 function log(text) {
     util.log(text);
+    log_file.write('\n');
     log_file.write(text);
 }
 
