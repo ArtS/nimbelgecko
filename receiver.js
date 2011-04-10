@@ -1,14 +1,12 @@
 #!/usr/bin/env node
 
-
 require.paths.unshift('.')
-require.paths.unshift('./internal')
 require.paths.unshift('./external')
-require.paths.unshift('./external/underscore')
+require.paths.unshift('./internal')
 require.paths.unshift('./external/node-mongodb-native/lib')
 require.paths.unshift('./external/connect/lib')
+require.paths.unshift('./external/connect/support');
 
-require('underscore')
 
 
 var ng = require('ng'),

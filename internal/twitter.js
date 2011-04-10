@@ -2,7 +2,8 @@ var sys = require('sys'),
     ng = require('ng'),
     oAuth = require('node-oauth').OAuth,
     querystring = require('querystring'),
-    EventEmitter = require('events').EventEmitter
+    EventEmitter = require('events').EventEmitter,
+    _ = require('underscore')._
 
 
 function oAuthGet(url, params, callback) {
