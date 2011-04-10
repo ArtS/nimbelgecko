@@ -1,25 +1,28 @@
 #!/usr/bin/env node
 
-require.paths.unshift('.');
+require.paths.unshift('.')
 require.paths.unshift('./internal');
 require.paths.unshift('./external');
 require.paths.unshift('./external/node-mongodb-native/lib');
 require.paths.unshift('./external/connect/lib');
+require.paths.unshift('./external/connect/support');
 require.paths.unshift('./external/ejs/lib');
-require.paths.unshift('./external/socket.io-connect');
-require.paths.unshift('./external/socket.io-connect/vendor');
+require.paths.unshift('./external/socket.io-connect')
+
+
+// This is needed to initialise the whole session thing 
+// for connect middleware
+require('socketIO')
 
 // Language extensions
 require('extensions');
-
-require('socketIO');
 
 
 var util = require('util'),
     connect = require('connect'),
     ng = require('ng'),
     urls = require('urls').urls,
-    socketIO = require('socket.io-node');
+    io = require('socket.io')
 
 
 function bindUrls(app, url) {
@@ -70,24 +73,25 @@ function routes(app) {
     }
 }
 
-function setupWebSocket(server, mongoStore) {
+function setupWebSocket(server) {
 
-    var socket = socketIO.listen(server);
+    var socket = io.listen(server)
 
     socket.on('connection', socket.prefixWithMiddleware(
         function(client,req, res) {
-            debugger;
+
             client.on('message',
                 function(message) {
                     console.log(message);
                     client.send({data: 'wtf!'});
                 }
-            );
+            )
+
             client.on('disconnect',
                 function() {
                     console.log('disconnected');
                 }
-            );
+            )
         }
     ));
 }
@@ -96,7 +100,6 @@ function setupWebSocket(server, mongoStore) {
 ng.conf.initConfig(
 
     function(err) {
-        var mongoStore = ng.db.mongoStore();
 
         if(err) {
             ng.log.error(err, 'Config initialisation failed.');
@@ -104,27 +107,29 @@ ng.conf.initConfig(
         }
 
         ng.db.initDatabase(['tweets', 'users'],
-            //TODO: create separate instance for static files?
+
             function(err) {
 
-                var server,
-                    io;
+                var server
 
                 if(err) {
                     ng.log.error(err, 'Database initialisation failed.');
                     return;
                 }
 
+                // TODO: create separate instance for static files?
                 server = connect.createServer(
-                    connect.bodyDecoder(),
-                    connect.cookieDecoder(),
-                    connect.session({ store: mongoStore }),
+                    connect.bodyParser(),
+                    connect.cookieParser(),
+                    connect.session({store: ng.db.mongoStore, secret: 'blah'}),
                     connect.router(routes),
-                    connect.staticProvider('./static')
-                );
-                server = server.listen(8081, '192.168.1.2');
+                    connect.static('./static')
+                )
 
-                setupWebSocket(server, mongoStore);
+                server.listen(ng.conf.server_port, 
+                              ng.conf.server_ip);
+
+                setupWebSocket(server);
             }
         );
     }

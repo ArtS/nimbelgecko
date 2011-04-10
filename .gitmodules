@@ -28,3 +28,6 @@
 [submodule "external/socket.io-connect"]
     path = external/socket.io-connect
     url = https://github.com/bnoguchi/Socket.IO-connect.git
+[submodule "external/socket.io"]
+	path = external/socket.io
+	url = git://github.com/LearnBoost/Socket.IO-node.git

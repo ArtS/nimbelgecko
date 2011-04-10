@@ -11,7 +11,7 @@ function _ensureSessionObject(session) {
 
 
 function _saveSession(req) {
-    req.sessionStore.set(req.sessionID, req.session);
+    req.sessionStore.set(req.sessionID, req.session, function() {});
 }
 
 

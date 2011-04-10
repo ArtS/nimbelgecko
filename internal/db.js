@@ -297,12 +297,15 @@ function saveStreamItem(item) {
 // Exports
 //
 
-exports.mongoStore = mongoStore;
-exports.collections = collections;
-exports.initDatabase = initDatabase;
-exports.saveUserDetails = saveUserDetails;
-exports.getRecentTweets = getRecentTweets;
-exports.saveUnknown = saveUnknown;
-exports.saveTweet = saveTweet;
-exports.getAllUserIds = getAllUserIds;
+exports.mongoStore = mongoStore({
+    'collection': 'session_store',
+})
+
+exports.collections = collections
+exports.initDatabase = initDatabase
+exports.saveUserDetails = saveUserDetails
+exports.getRecentTweets = getRecentTweets
+exports.saveUnknown = saveUnknown
+exports.saveTweet = saveTweet
+exports.getAllUserIds = getAllUserIds
 exports.saveStreamItem = saveStreamItem;

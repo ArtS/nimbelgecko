@@ -16,7 +16,14 @@ function getAuth() {
 }
 
 exports.getOAuthRequestToken = function(callback) {
-    getAuth().getOAuthRequestToken({ oauth_callback: ng.conf.oauth_callback_url }, callback);
+    var callback_url = {
+                            protocol: 'http',
+                            hostname: ng.conf.server_ip,
+                            port: ng.conf.server_port,
+                            pathname: ng.conf.oauth_callback_url 
+                       }
+    getAuth().getOAuthRequestToken({oauth_callback: URL.format(callback_url)},
+                                   callback);
 }
 
 exports.getOAuthAccessToken = function(oauth_token, oauth_token_secret, oauth_verifier, callback) {
