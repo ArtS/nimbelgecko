@@ -67,12 +67,15 @@ function saveUnknown(item, callback) {
     col.insert(item, callback);
 }
 
+
 function saveTweet(tweet, callback) {
 
     var col = collections[TWEETS_COLLECTION];
 
     col.find(
+
         { id_str: tweet.id_str }, {},
+
         function(err, cursor) {
 
             if(err) {
@@ -151,56 +154,13 @@ function saveUserDetails(params, callback) {
 }
 
 
-function initDatabase(colNames, onDatabaseReady) {
-
-    var collectionsCopy;
-
-    if (!Array.isArray(colNames)) {
-        throw {
-            name: 'InvalidArgumentException',
-            message: 'collections parameter must be an array.' 
-        };
-    }
-
-    collectionsCopy = colNames.splice(0);
-
-    // Recursive function for initialising all the collections
-    // supplied in 'colNames' parameter to initDatabase()
-    function _initCollections() {
-        var colName = collectionsCopy.pop(0);
-        if(colName === undefined) {
-            onDatabaseReady(null);
-            return;
-        }
-
-        db.collection(
-            colName, 
-            function(err, collection) {
-                if (err) {
-                    onDatabaseReady(err);
-                    return;
-                }
-
-                collections[colName] = collection;
-                _initCollections();
-            }
-        );
-    }
-
-    db.open(
-        function(err, db) {
-            if(err) {
-                onDatabaseReady(err);
-            }
-
-            _initCollections();
-        }
-    );
-}
-
 function getRecentTweets(user_id, callback) {
 
     var col = collections[TWEETS_COLLECTION];
+
+    if (typeof user_id !== 'string') {
+        user_id = user_id.toString()
+    }
 
     col.find(
         { 
@@ -250,7 +210,10 @@ function _isFieldPresent(elem, field_name) {
 //
 function saveStreamItem(item) {
 
-    var msg;
+    var msg
+      , for_user = (typeof item.for_user === 'string' ? 
+                           item.for_user : 
+                           item.for_user.toString())
     
     if (!_isFieldPresent(item, 'for_user')) {
         ng.log.error('No \'for_user\' field found in ' + JSON.stringify(item));
@@ -262,12 +225,13 @@ function saveStreamItem(item) {
         return;
     }
 
-    msg = item.message;
+    msg = item.message
+    msg.for_user = for_user
 
     if(msg.user !== undefined &&
        msg.text !== undefined) {
 
-        msg.is_read = false;
+        msg.is_read = false
 
         saveTweet(msg, 
             function(err) {
@@ -281,7 +245,9 @@ function saveStreamItem(item) {
                  msg.user.screen_name +': ' + 
                  msg.text);
     } else {
+        //
         // Unknown type of message
+        //
         saveUnknown(msg, 
             function(err) {
                 if (err) {
@@ -289,9 +255,59 @@ function saveStreamItem(item) {
                 }
             }
         );
+
         ng.log.log('Saved unknown: ' + JSON.stringify(msg));
     }
 }
+
+
+function initDatabase(colNames, onDatabaseReady) {
+
+    var collectionsCopy;
+
+    if (!Array.isArray(colNames)) {
+        throw {
+            name: 'InvalidArgumentException',
+            message: 'collections parameter must be an array.' 
+        };
+    }
+
+    collectionsCopy = colNames.splice(0);
+
+    // Recursive function for initialising all the collections
+    // supplied in 'colNames' parameter to initDatabase()
+    function _initCollections() {
+        var colName = collectionsCopy.pop(0);
+        if(colName === undefined) {
+            onDatabaseReady(null);
+            return;
+        }
+
+        db.collection(
+            colName, 
+            function(err, collection) {
+                if (err) {
+                    onDatabaseReady(err);
+                    return;
+                }
+
+                collections[colName] = collection;
+                _initCollections();
+            }
+        );
+    }
+
+    db.open(
+        function(err, db) {
+            if(err) {
+                onDatabaseReady(err);
+            }
+
+            _initCollections();
+        }
+    );
+}
+
 
 //
 // Exports

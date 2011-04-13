@@ -137,23 +137,22 @@
 <script>
     (function() {
 
-        var socket = new io.Socket(null, {port: 8081, rememberTransport: false}),
-            TweetModel = Backbone.Model.extend({
+        var socket = new io.Socket(null, {port: 8081, rememberTransport: false})
+          , TweetModel = Backbone.Model.extend({
                             markAsRead: function() {
                                 this.set({is_read: true});
                             }
-                         }),
+                         })
 
-            Collection = Backbone.Collection.extend({
+          , Collection = Backbone.Collection.extend({
                             model: TweetModel,
-                         }),
+                         })
 
-            View = Backbone.View.extend({
+          , View = Backbone.View.extend({
 
                 templateElem: $('#sectionTemplate'),
-
+                
                 render: function() {
-                    
                     var directives = {
                             'section' : {
 
@@ -194,6 +193,7 @@
                         console.log(arguments);
                     }
                 );
+
                 socket.connect();
                 socket.send({data: 'zomg wtf!'});
 
@@ -205,7 +205,6 @@
                     },
                     success: onTweetsLoaded 
                 });
-
             }
         );
         /*

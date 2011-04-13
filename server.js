@@ -98,46 +98,53 @@ function setupWebSocket(server) {
 }
 
 
-ng.conf.initConfig(
+function startServer() {
 
-    function(err) {
+    ng.conf.initConfig(
 
-        if(err) {
-            ng.log.error(err, 'Config initialisation failed.');
-            return;
-        }
+        function(err) {
 
-        ng.db.initDatabase(['tweets', 'users'],
-
-            function(err) {
-
-                var server
-
-                if(err) {
-                    ng.log.error(err, 'Database initialisation failed.');
-                    return;
-                }
-
-                // TODO: create separate instance for static files?
-                server = connect.createServer(
-                    connect.bodyParser(),
-                    connect.cookieParser(),
-                    connect.session({store: ng.db.mongoStore, secret: 'blah'}),
-                    connect.router(routes),
-                    connect.static('./static')
-                )
-
-                server.listen(ng.conf.server_port, 
-                              ng.conf.server_ip);
-
-                setupWebSocket(server);
+            if(err) {
+                ng.log.error(err, 'Config initialisation failed.');
+                return;
             }
-        );
-    }
-);
+
+            ng.db.initDatabase(['tweets', 'users'],
+
+                function(err) {
+
+                    var server
+
+                    if(err) {
+                        ng.log.error(err, 'Database initialisation failed.');
+                        return;
+                    }
+
+                    // TODO: create separate instance for static files?
+                    server = connect.createServer(
+                        connect.bodyParser(),
+                        connect.cookieParser(),
+                        connect.session({store: ng.db.mongoStore, secret: 'blah'}),
+                        connect.router(routes),
+                        connect.static('./static')
+                    )
+
+                    server.listen(ng.conf.server_port, 
+                                ng.conf.server_ip);
+
+                    setupWebSocket(server);
+                }
+            );
+        }
+    );
+}
+
 
 process.on('uncaughtException',
     function(err) {
-        ng.log.error(err, 'Unhandled exception');
+        ng.log.error(err, 'Unhandled exception')
+        startServer()
     }
 );
+
+startServer()
