@@ -68,8 +68,7 @@ a {
     color: darkgray;
 }
 
-h1, h2, h3, h4, h5, h6,
-section.nav {
+h1, h2, h3, h4, h5, h6, nav {
     font-family: "etica-1", "etica-2",Helvetica,Arial,sans-serif;
 }
 
@@ -102,6 +101,43 @@ header h3 {
 }
 
 /*
+ * Navigation
+ */
+
+nav {
+    padding: 8px 0px;
+    margin: 0px 0px 5px 0px;
+    background: lightgray;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+}
+
+nav ul li {
+    font-size: 15px;
+    letter-spacing: 0.7px;
+    line-height: 18px;
+}
+
+nav ul li {
+    color: white;
+    background: gray;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+}
+
+nav ul li {
+    float: left;
+    list-style: none;
+    padding: 2px 6px;
+    margin: 0px 5px 0px 5px;
+}
+
+/*
+ * End Navigation 
+ * /
+
+
+/*
  * Column sections
  */
 
@@ -116,49 +152,13 @@ section.category header {
 section.category {
     margin: 0px 12px 0px 0px;
     padding: 4px 12px 20px 10px;
-    float: left;
 }
 
 section.category {
     border-radius: 10px;
     -moz-border-radius: 10px;
     background: lightgray;
-    width: 300px;
 }
-
-/*
- * Navigation
- */
-
-section.nav {
-    padding: 8px 0px;
-    margin: 0px 0px 5px 0px;
-    background: lightgray;
-    border-radius: 5px;
-    -moz-border-radius: 5px;
-}
-
-section.nav ul li {
-    font-size: 15px;
-    letter-spacing: 0.7px;
-    line-height: 18px;
-}
-
-section.nav ul li {
-    color: white;
-    background: gray;
-    border-radius: 5px;
-    -moz-border-radius: 5px;
-}
-
-section.nav ul li {
-    float: left;
-    list-style: none;
-    padding: 2px 6px;
-    margin: 0px 5px 0px 5px;
-}
-
-/* End Navigation */
 
 .tagline p {
     font-weight: 300;
