@@ -23,7 +23,7 @@ var util = require('util'),
     connect = require('connect'),
     ng = require('ng'),
     urls = require('urls').urls,
-    io = require('socket.io')
+    io = require('socket.io-node')
 
 
 function bindUrls(app, url) {
@@ -32,13 +32,18 @@ function bindUrls(app, url) {
 
             // If no template defined, leave the rendering up to the view
             if(url.template === undefined) {
+
                 url.view(req, res, next);
+
             } else {
-            // Otherwise, get the context from the view and use it to 
-            // render the template.
+
+                //
+                // Otherwise, get the context from the view and use it to 
+                // render the template.
+                //
                 url.view(req, res, 
                     function(err, context) {
-                        // In case view failed, show error
+                        // In case call to view failed, show error
                         if(err) {
                             ng.http.error(req, res, err, 
                                           'Error obtaining context for view at ' + url.url);
@@ -121,8 +126,9 @@ function startServer() {
                     }
 
                     // TODO: create separate instance for static files?
+                    debugger
                     server = connect.createServer(
-                        connect.bodyParser(),
+                        //connect.bodyParser(),
                         connect.cookieParser(),
                         connect.session({store: ng.db.mongoStore, secret: 'blah'}),
                         connect.router(routes),
@@ -145,6 +151,6 @@ process.on('uncaughtException',
         ng.log.error(err, 'Unhandled exception')
         startServer()
     }
-);
+)
 
 startServer()

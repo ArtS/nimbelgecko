@@ -3,6 +3,8 @@ var ng = require('ng');
 
 exports.tweets = function(req, res, next) {
 
+    debugger
+
     ng.db.getRecentTweets(req.ng.user.user_id,
 
         function(err, arr) {

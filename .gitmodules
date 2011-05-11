@@ -7,18 +7,12 @@
 [submodule "external/node-mongodb-native"]
 	path = external/node-mongodb-native
 	url = http://github.com/christkv/node-mongodb-native.git
-[submodule "external/connect"]
-	path = external/connect
-	url = http://github.com/senchalabs/connect.git
 [submodule "external/ejs"]
 	path = external/ejs
 	url = git://github.com/visionmedia/ejs.git
 [submodule "external/node-oauth"]
     path = external/node-oauth
     url = http://github.com/ciaranj/node-oauth.git
-[submodule "external/node-comet"]
-	path = external/node-comet
-	url = https://github.com/eculver/node_comet.git
 [submodule "external/underscore"]
 	path = external/underscore
 	url = http://github.com/documentcloud/underscore.git
@@ -29,5 +23,5 @@
     path = external/socket.io-connect
     url = https://github.com/bnoguchi/Socket.IO-connect.git
 [submodule "external/socket.io"]
-	path = external/socket.io
+	path = external/socket.io-node
 	url = git://github.com/LearnBoost/Socket.IO-node.git
