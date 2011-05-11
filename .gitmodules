@@ -19,9 +19,6 @@
 [submodule "external/node-chain"]
 	path = external/node-chain
 	url = git@github.com:ArtS/node-chain.git
-[submodule "external/socket.io-connect"]
-    path = external/socket.io-connect
-    url = https://github.com/bnoguchi/Socket.IO-connect.git
-[submodule "external/socket.io"]
+[submodule "external/socket.io-node"]
 	path = external/socket.io-node
 	url = git://github.com/LearnBoost/Socket.IO-node.git
