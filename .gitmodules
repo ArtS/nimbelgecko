@@ -1,15 +1,6 @@
 [submodule "external/connect-mongodb"]
 	path = external/connect-mongodb
 	url = http://github.com/masylum/connect-mongodb.git
-[submodule "external/node-mongodb-native"]
-	path = external/node-mongodb-native
-	url = http://github.com/christkv/node-mongodb-native.git
-[submodule "external/ejs"]
-	path = external/ejs
-	url = git://github.com/visionmedia/ejs.git
-[submodule "external/node-oauth"]
-    path = external/node-oauth
-    url = http://github.com/ciaranj/node-oauth.git
 [submodule "external/underscore"]
 	path = external/underscore
 	url = http://github.com/documentcloud/underscore.git

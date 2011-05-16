@@ -1,4 +1,4 @@
-var mongo = require('node-mongodb-native/lib/mongodb'),
+var mongo = require('mongodb'),
     ng = require('ng'),
     db = new mongo.Db(
         'nimblegecko',

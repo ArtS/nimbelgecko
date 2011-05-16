@@ -1,6 +1,7 @@
+console.log(require('oauth'))
 var sys = require('sys'),
     ng = require('ng'),
-    oAuth = require('node-oauth').OAuth,
+    oAuth = require('oauth').OAuth,
     querystring = require('querystring'),
     EventEmitter = require('events').EventEmitter,
     _ = require('underscore')._
