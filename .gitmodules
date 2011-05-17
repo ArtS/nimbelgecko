@@ -1,9 +1,0 @@
-[submodule "external/connect-mongodb"]
-	path = external/connect-mongodb
-	url = http://github.com/masylum/connect-mongodb.git
-[submodule "external/underscore"]
-	path = external/underscore
-	url = http://github.com/documentcloud/underscore.git
-[submodule "external/socket.io-node"]
-	path = external/socket.io-node
-	url = git://github.com/LearnBoost/Socket.IO-node.git
