@@ -1,18 +1,12 @@
 #!/usr/bin/env node
 
 require.paths.unshift('.')
-require.paths.unshift('./external')
 require.paths.unshift('./internal')
-require.paths.unshift('./external/connect/lib')
-require.paths.unshift('./external/connect/support');
-
 
 
 var ng = require('ng'),
     runChain = require('node-chain').runChain,
     STREAM_CHECK_INTERVAL = 60000
-
-
 
 //
 // Inits config engine, database and then kicks off

@@ -1,19 +1,11 @@
 #!/usr/bin/env node
 
-
 require.paths.unshift('.')
 require.paths.unshift('./internal');
-require.paths.unshift('./external');
-require.paths.unshift('./external/node-mongodb-native/lib');
-require.paths.unshift('./external/connect/lib');
-require.paths.unshift('./external/connect/support');
-require.paths.unshift('./external/ejs/lib');
-require.paths.unshift('./external/socket.io-connect')
-
 
 // This is needed to initialise the whole session thing 
 // for connect middleware
-require('socketIO')
+require('socket.io-connect')
 
 // Language extensions
 require('extensions');
@@ -23,11 +15,13 @@ var util = require('util'),
     connect = require('connect'),
     ng = require('ng'),
     urls = require('urls').urls,
-    io = require('socket.io-node')
+    io = require('socket.io')
 
 
 function bindUrls(app, url) {
+
     app.get(url.url,
+
         function(req, res, next) {
 
             // If no template defined, leave the rendering up to the view
@@ -84,7 +78,7 @@ function setupWebSocket(server) {
     var socket = io.listen(server)
 
     socket.on('connection', socket.prefixWithMiddleware(
-        function(client,req, res) {
+        function(client, req, res) {
 
             client.on('message',
                 function(message) {
@@ -128,15 +122,14 @@ function startServer() {
                     // TODO: create separate instance for static files?
                     debugger
                     server = connect.createServer(
-                        //connect.bodyParser(),
+                        connect.bodyParser(),
                         connect.cookieParser(),
                         connect.session({store: ng.db.mongoStore, secret: 'blah'}),
                         connect.router(routes),
                         connect.static('./static')
                     )
 
-                    server.listen(ng.conf.server_port, 
-                                ng.conf.server_ip);
+                    server.listen(ng.conf.server_port, ng.conf.server_ip);
 
                     setupWebSocket(server);
                 }
