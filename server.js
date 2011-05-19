@@ -73,28 +73,69 @@ function routes(app) {
 
 function onSocketReady(client, req, res) {
 
-    var user = ng.session.getLoggedInUser(req);
+    var user = ng.session.getLoggedInUser(req),
+        lastId = null,
+        intervalId = null
+
+    function sendSocketError(client, err) {
+        client.send({'error': err})
+    }
+
+    function sendSocketData(client, data) {
+        client.send({'data': data})
+    }
+
+    function regularCheck() {
+
+        ng.api.getNewTweets(user, lastId,
+            function(err, result) {
+                if (err) {
+                    sendSocketError(client, err)
+                    return
+                }
+
+                if (result.length === 0) {
+                    return
+                }
+
+                lastIs = result.lastId
+                delete result.lastId
+
+                sendSocketData(client, result)
+            }
+        )
+    }
 
     client.on('message',
         function(message) {
-            client.send({data: 'wtf!'});
+            //client.send({data: 'wtf!'});
         }
     )
 
     client.on('disconnect',
         function() {
-            console.log('disconnected');
+
+            console.log(user.user_id + ' disconnected');
+
+            if (intervalId !== null) {
+                clearTimeout(intervalId)
+            }
         }
     )
 
     ng.api.getGroupedTweets(user,
         function(err, result) {
             if (err) {
-                cleint.send({'error': err})
+                sendSocketError(client, err)
                 return
             }
+            
+            lastId = result.lastId
+            delete result.lastId
 
-            client.send({'data': result})
+            sendSocketData(client, result)
+
+            intervalId = setInterval(regularCheck, 3000)
         }
     )
 }

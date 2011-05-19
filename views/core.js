@@ -5,7 +5,8 @@ exports.home_old = function(req, res, next) {
 
     var user = req.ng.user;
 
-    ng.db.getRecentTweets(user.user_id,
+    ng.db.getRecentTweets(
+        {userId: user.user_id},
 
         function(err, tweets) {
             var sorted_tweets;

@@ -154,36 +154,54 @@ function saveUserDetails(params, callback) {
 }
 
 
-function getRecentTweets(user_id, callback) {
+function getRecentTweets(options, next) {
+    
+    console.log(options)
 
-    var col = collections[TWEETS_COLLECTION];
+    var col = collections[TWEETS_COLLECTION],
+        selectCriteria = {},
+        userId
 
-    if (typeof user_id !== 'string') {
-        user_id = user_id.toString()
+    if (!options.userId) {
+        next('userId is not supplied for getRecentTweets')
+        return
     }
 
+    if (typeof options.userId !== 'string') {
+        userId = options.userId.toString()
+    } else {
+        userId = options.userId
+    }
+
+    selectCriteria.for_user = userId
+
+    if (typeof options.lastId !== "undefined") {
+        selectCriteria.id_str = {$gt: options.lastId}
+    }    
+
+    console.log('selectCriteria')
+    console.log(selectCriteria)
+
     col.find(
-        { 
-            for_user: user_id 
-        },
+        selectCriteria,
         { 
             limit: 300,
             sort: [['id', 'desc']]
         },
         function(err, cursor) {
             if(err) {
-                callback(err, null);
+                next(err, null);
                 return;
             }
 
             cursor.toArray(
                 function(err, arr) {
                     if(err) {
-                        callback(err, null);
+                        next(err, null);
                         return;
                     }
                     
-                    callback(null, arr);
+                    next(null, arr);
                 }
             );
 
