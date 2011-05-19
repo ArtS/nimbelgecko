@@ -3,8 +3,6 @@
 require.paths.unshift('.')
 require.paths.unshift('./internal');
 
-// This is needed to initialise the whole session thing 
-// for connect middleware
 require('socket.io-connect')
 
 // Language extensions
@@ -16,6 +14,8 @@ var util = require('util'),
     ng = require('ng'),
     urls = require('urls').urls,
     io = require('socket.io')
+    socketIO = require('socket.io-connect').socketIO
+
 
 
 function bindUrls(app, url) {
@@ -73,27 +73,20 @@ function routes(app) {
     }
 }
 
-function setupWebSocket(server) {
+function onSocketReady(client, req, res) {
 
-    var socket = io.listen(server)
-
-    socket.on('connection', socket.prefixWithMiddleware(
-        function(client, req, res) {
-
-            client.on('message',
-                function(message) {
-                    console.log(message);
-                    client.send({data: 'wtf!'});
-                }
-            )
-
-            client.on('disconnect',
-                function() {
-                    console.log('disconnected');
-                }
-            )
+    client.on('message',
+        function(message) {
+            console.log(message);
+            client.send({data: 'wtf!'});
         }
-    ));
+    )
+
+    client.on('disconnect',
+        function() {
+            console.log('disconnected');
+        }
+    )
 }
 
 
@@ -120,8 +113,9 @@ function startServer() {
                     }
 
                     // TODO: create separate instance for static files?
-                    debugger
+                    
                     server = connect.createServer(
+                        socketIO(function() { return server; }, onSocketReady),
                         connect.bodyParser(),
                         connect.cookieParser(),
                         connect.session({store: ng.db.mongoStore, secret: 'blah'}),
@@ -131,7 +125,7 @@ function startServer() {
 
                     server.listen(ng.conf.server_port, ng.conf.server_ip);
 
-                    setupWebSocket(server);
+                    //setupWebSocket(server);
                 }
             );
         }

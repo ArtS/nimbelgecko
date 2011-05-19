@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+
+npm install socket.io
+npm install connect
+npm install socket.io-connect
+npm install mongodb
+npm install connect-mongodb
+npm install ejs
+npm install underscore
+npm install oauth
+npm install node-chain
+npm install node-config
