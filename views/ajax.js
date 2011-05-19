@@ -1,31 +1,18 @@
-var ng = require('ng');
+var ng = require('ng')
 
 
 exports.tweets = function(req, res, next) {
 
-    debugger
+    ng.api.getGroupedTweets(req.ng.user,
 
-    ng.db.getRecentTweets(req.ng.user.user_id,
-
-        function(err, arr) {
-            var sorted,
-                key,
-                result = [];
+        function(err, result) {
 
             if (err) {
-                ng.http.error(req, res, err, 'Unable to obtain tweets');
-                return;
+                ng.http.error(req, res, err, 'Unable to obtain tweets')
+                return
             }
 
-            sorted = ng.sorting.sortTweets(arr, req.ng.user);
-            for (key in sorted) {
-                if (!sorted.hasOwnProperty(key)) {
-                    continue;
-                }
-                result.push([key, sorted[key]]);
-            }
-
-            ng.http.writeJSON(res, result);
+            ng.http.writeJSON(res, result)
         }
-    );
+    )
 }

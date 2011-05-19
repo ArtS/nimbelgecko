@@ -28,13 +28,8 @@ function getObject(req, name) {
 }
 
 
-function setLoggedInUser(req, user_profile) {
-    storeObject(req, USER_SESSION_ID,
-        {
-            user_profile: user_profile,
-            isAuthenticated: true
-        }
-    );
+function setLoggedInUser(req, user) {
+    storeObject(req, USER_SESSION_ID, user);
 }
 
 

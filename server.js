@@ -3,8 +3,6 @@
 require.paths.unshift('.')
 require.paths.unshift('./internal');
 
-require('socket.io-connect')
-
 // Language extensions
 require('extensions');
 
@@ -75,9 +73,10 @@ function routes(app) {
 
 function onSocketReady(client, req, res) {
 
+    var user = ng.session.getLoggedInUser(req);
+
     client.on('message',
         function(message) {
-            console.log(message);
             client.send({data: 'wtf!'});
         }
     )
@@ -85,6 +84,17 @@ function onSocketReady(client, req, res) {
     client.on('disconnect',
         function() {
             console.log('disconnected');
+        }
+    )
+
+    ng.api.getGroupedTweets(user,
+        function(err, result) {
+            if (err) {
+                cleint.send({'error': err})
+                return
+            }
+
+            client.send({'data': result})
         }
     )
 }
@@ -125,7 +135,6 @@ function startServer() {
 
                     server.listen(ng.conf.server_port, ng.conf.server_ip);
 
-                    //setupWebSocket(server);
                 }
             );
         }

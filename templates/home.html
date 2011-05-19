@@ -202,8 +202,13 @@
 
                 window.view = new View();
 
-                function onTweetsLoaded(data, textStatus) {
-                    window.view.models = new Collection(data);
+                function onTweetsLoaded(data) {
+                    if (data.error) {
+                        alert(data.error)
+                        return
+                    }
+
+                    window.view.models = new Collection(data.data);
                     window.view.render();
                     $('#sectionsPlaceholder').replaceWith(window.view.el);
                 }
@@ -211,25 +216,26 @@
                 $(document).ready(
 
                     function() {
-                        socket.on('message',
+
+                        socket.on('connect',
                             function() {
+                                console.log(arguments);
+                                socket.send({data: 'zomg wtf!'});
+                            }
+                        );
+
+                        socket.on('message',
+                            function(data) {
+                                onTweetsLoaded(data);
                                 console.log(arguments);
                             }
                         );
 
                         socket.connect();
-                        socket.send({data: 'zomg wtf!'});
 
-                        var s = new
-                        $.ajax({
-                            url: '/ajax/tweets',
-                            error: function() {
-                                console.log('ajax error');
-                            },
-                            success: onTweetsLoaded 
-                        });
                     }
                 );
+
                 /*
                 Controller = Backbone.Controller.extend({
                     routes: {

@@ -38,6 +38,7 @@ function error(req, res) {
 
 // TODO: move to decorators?
 function login_required(callback) {
+
     return function(req, res, next) {
 
         var user = ng.session.getLoggedInUser(req);
@@ -48,7 +49,7 @@ function login_required(callback) {
         }
 
         req.ng = req.ng || {};
-        req.ng.user = user.user_profile;
+        req.ng.user = user;
 
         callback(req, res, next);
     }
