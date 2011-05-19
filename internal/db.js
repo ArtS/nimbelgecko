@@ -261,6 +261,56 @@ function saveStreamItem(item) {
 }
 
 
+function getUserTokenSecret(user_id) {
+    var users_col = collections[USERS_COLLECTION]
+
+    users_col.find({user_id: user_id}, {},
+        function (err, cursor) {
+            
+        }
+    )
+}
+
+
+function getLastTweetId(user_id, callback) {
+
+    var col = collections[TWEETS_COLLECTION]
+
+    col.find(
+        {for_user: user_id},
+        {limit: 1, sort: [['id', 'desc']]},
+
+        function(err, cursor) {
+
+            if (err) {
+                ng.log.error(err, 'Error obtaining last tweet id for user ' + user_id)
+                callback(err, null)
+                return
+            }
+
+            cursor.toArray(
+                function(err, arr) {
+                    
+                    var id = null
+
+                    if (err) {
+                        ng.log.error(err, 'Error converting cursor to array for user ' + user_id)
+                        callback(err, null)
+                        return
+                    }
+    
+                    if (arr !== null && arr.length !== 0) {
+                        id = arr[0].id.toString()
+                    }
+
+                    callback(null, id)
+                }
+            )
+        }
+    )
+
+}
+
 function initDatabase(colNames, onDatabaseReady) {
 
     var collectionsCopy;
@@ -324,4 +374,5 @@ exports.getRecentTweets = getRecentTweets
 exports.saveUnknown = saveUnknown
 exports.saveTweet = saveTweet
 exports.getAllUserIds = getAllUserIds
-exports.saveStreamItem = saveStreamItem;
+exports.saveStreamItem = saveStreamItem
+exports.getLastTweetId = getLastTweetId

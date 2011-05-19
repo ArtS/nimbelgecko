@@ -76,12 +76,13 @@ function retrieveNewTweets(onNewTweetsRetrieved) {
         function(err, tweets) {
             if(err) {
                 utils.printError(err, 'Unable to retrieve tweets (2)'); 
+
                 // Re-try after 2 minutes
                 utils.retryOnError(
-                    function() { exports.retrieveNewTweets(onNewTweetsRetrieved); }
+                    function() { retrieveNewTweets(onNewTweetsRetrieved); }
                 );
-                return;
             }
+
             onNewTweetsRetrieved(null, tweets);
         }
     );
@@ -93,7 +94,7 @@ function startStreaming(ids_to_follow) {
     var url = 'http://betastream.twitter.com/2b/site.json',
         ids_str = ids_to_follow.join(',');
 
-    return oAuthGet(url, {with: 'followings', follow: ids_str});
+    return oAuthGet(url, {replies: 'all', with: 'followings', follow: ids_str});
 }
 
 
@@ -184,6 +185,19 @@ function ReceivingStream(allUserIds) {
 }
 
 ReceivingStream.prototype = new EventEmitter()
+
+
+function getAllRecentTweets(user_ids, callback) {
+    _(user_ids).each(function(user_id) {
+        db.getLastTweetId(user_id,
+            function(err, tweet_id) {
+                // TODO: Add calls to db. to fugure out token_secret,
+                //       Add calls to twitter. to get the last tweets for given tweet_id & token_secret
+                //       Save received tweets
+            }
+        )
+    })
+}
 
 
 exports.oAuthGet = oAuthGet
