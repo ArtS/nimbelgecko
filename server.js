@@ -1,19 +1,11 @@
 #!/usr/bin/env node
 
-
 require.paths.unshift('.')
 require.paths.unshift('./internal');
-require.paths.unshift('./external');
-require.paths.unshift('./external/node-mongodb-native/lib');
-require.paths.unshift('./external/connect/lib');
-require.paths.unshift('./external/connect/support');
-require.paths.unshift('./external/ejs/lib');
-require.paths.unshift('./external/socket.io-connect')
-
 
 // This is needed to initialise the whole session thing 
 // for connect middleware
-require('socketIO')
+require('socket.io-connect')
 
 // Language extensions
 require('extensions');
@@ -27,18 +19,25 @@ var util = require('util'),
 
 
 function bindUrls(app, url) {
+
     app.get(url.url,
+
         function(req, res, next) {
 
             // If no template defined, leave the rendering up to the view
             if(url.template === undefined) {
+
                 url.view(req, res, next);
+
             } else {
-            // Otherwise, get the context from the view and use it to 
-            // render the template.
+
+                //
+                // Otherwise, get the context from the view and use it to 
+                // render the template.
+                //
                 url.view(req, res, 
                     function(err, context) {
-                        // In case view failed, show error
+                        // In case call to view failed, show error
                         if(err) {
                             ng.http.error(req, res, err, 
                                           'Error obtaining context for view at ' + url.url);
@@ -79,7 +78,7 @@ function setupWebSocket(server) {
     var socket = io.listen(server)
 
     socket.on('connection', socket.prefixWithMiddleware(
-        function(client,req, res) {
+        function(client, req, res) {
 
             client.on('message',
                 function(message) {
@@ -121,6 +120,7 @@ function startServer() {
                     }
 
                     // TODO: create separate instance for static files?
+                    debugger
                     server = connect.createServer(
                         connect.bodyParser(),
                         connect.cookieParser(),
@@ -129,8 +129,7 @@ function startServer() {
                         connect.static('./static')
                     )
 
-                    server.listen(ng.conf.server_port, 
-                                ng.conf.server_ip);
+                    server.listen(ng.conf.server_port, ng.conf.server_ip);
 
                     setupWebSocket(server);
                 }
@@ -145,6 +144,6 @@ process.on('uncaughtException',
         ng.log.error(err, 'Unhandled exception')
         startServer()
     }
-);
+)
 
 startServer()

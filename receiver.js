@@ -1,40 +1,12 @@
 #!/usr/bin/env node
 
 require.paths.unshift('.')
-require.paths.unshift('./external')
 require.paths.unshift('./internal')
-require.paths.unshift('./external/node-mongodb-native/lib')
-require.paths.unshift('./external/connect/lib')
-require.paths.unshift('./external/connect/support');
-
 
 
 var ng = require('ng'),
     runChain = require('node-chain').runChain,
     STREAM_CHECK_INTERVAL = 60000
-
-
-
-//
-// Inits config engine, database and then kicks off
-// receiving stream initialisation chain
-//
-runChain([
-    {
-        target: ng.conf.initConfig,
-        errorMessage: 'Unable to init the config'
-    },
-    {
-        target: ng.db.initDatabase,
-        args: [['tweets', 'users', 'other']],
-        errorMessage: 'Database initialisation failed.'
-    },
-    {
-        target: startReceivingAllTweets,
-        errorMessage: 'Error starting streaming'
-    }
-])
-
 
 //
 // Starts receiving all tweets from twitter in streaming mode
@@ -63,3 +35,35 @@ function startReceivingAllTweets() {
         }
     ])
 }
+
+//
+// Inits config engine, database and then kicks off
+// receiving stream initialisation chain
+//
+function startReceiver() {
+    runChain([
+        {
+            target: ng.conf.initConfig,
+            errorMessage: 'Unable to init the config'
+        },
+        {
+            target: ng.db.initDatabase,
+            args: [['tweets', 'users', 'other']],
+            errorMessage: 'Database initialisation failed.'
+        },
+        {
+            target: startReceivingAllTweets,
+            errorMessage: 'Error starting streaming'
+        }
+    ])
+}
+
+
+process.on('uncaughtException',
+    function(err) {
+        ng.log.error(err, 'Unhandled exception')
+        startReceiver()
+    }
+)
+
+startReceiver()

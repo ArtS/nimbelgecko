@@ -1,7 +1,7 @@
 
 // TODO: Enumerate through files in internal
 exports.templates = require('templates');
-exports.oauth = require('oauth');
+exports.oauth_tools = require('oauth-tools');
 exports.conf = require('node-config');
 exports.db = require('db');
 exports.http = require('http_tools');

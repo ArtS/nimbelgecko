@@ -20,7 +20,7 @@ exports.callback = function(req, res, next) {
     
     oauth_verifier = qs.parse(reqUrl.query).oauth_verifier;
     
-    ng.oauth.getOAuthAccessToken(
+    ng.oauth_tools.getOAuthAccessToken(
         oauth_credentials.oauth_token,
         oauth_credentials.oauth_token_secret,
         oauth_verifier,
@@ -59,7 +59,7 @@ exports.callback = function(req, res, next) {
 };
 
 exports.register = function(req, res, next) {
-    ng.oauth.getOAuthRequestToken(
+    ng.oauth_tools.getOAuthRequestToken(
         function(err, oauth_token, oauth_token_secret, results) {
             if(err) {
                 ng.http.error(req, res, err);
@@ -71,7 +71,7 @@ exports.register = function(req, res, next) {
                     }
                 );
 
-                ng.oauth.redirectToTwitterAuth(res, oauth_token);
+                ng.oauth_tools.redirectToTwitterAuth(res, oauth_token);
             }
         }
     )

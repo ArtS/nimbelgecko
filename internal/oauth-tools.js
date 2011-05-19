@@ -1,4 +1,4 @@
-var oAuth = require('node-oauth').OAuth,
+var oAuth = require('oauth').OAuth,
     URL = require('url'),
     util = require('util'),
     ng = require('ng');
