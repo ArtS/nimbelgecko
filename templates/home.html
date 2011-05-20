@@ -88,6 +88,15 @@
 
         <div id="templates" style="display: none;">
 
+            <ul id="tweetTemplate">
+                <li class="list-item-tweet">
+                    <span class="text"></span>
+                    <span class="tweet-link">
+                        <a href="">@</a>
+                    </span>
+                </li>
+            </ul>
+
             <div id="sectionsDiv" class="categories row">
 
                 <div class="fourcol">
@@ -104,14 +113,7 @@
                             <div class="clear"></div>
                         </header>
 
-                        <ul class="list-tweets">
-                            <li class="list-item-tweet">
-                                <span class="text"></span>
-                                <span class="tweet-link">
-                                    <a href="">@</a>
-                                </span>
-                            </li>
-                        </ul>
+                        <ul class="list-tweets" id="type_"></ul>
 
                     </section>
 
@@ -141,135 +143,17 @@
 
                 <div id="sectionsPlaceholder"></div>
 
+                <section class="row"`>
+                    <footer class="twelvecol last">
+                        <p><small>&copy; Copyright NimbleGecko 2011. All Rights Reserved.</small></p>
+                    </footer>
+                </section>
+
             </article>
             
-            <footer>
-                <p><small>&copy; Copyright NimbleGecko 2011. All Rights Reserved.</small></p>
-            </footer>
-
         </div>
 
-        <script>
-            (function() {
-
-                var isLoaded = false
-                  , socket = new io.Socket(null, {port: 8081, rememberTransport: false})
-                , TweetModel = Backbone.Model.extend({
-                                    markAsRead: function() {
-                                        this.set({is_read: true});
-                                    }
-                                })
-
-                , Collection = Backbone.Collection.extend({
-                                    model: TweetModel,
-                                })
-
-                , View = Backbone.View.extend({
-
-                        templateElem: $('#sectionsDiv'),
-                        
-                        render: function() {
-
-                            var directives = {
-
-                                    'div.fourcol' : {
-
-                                        'coll<-collections': {
-
-                                            'header div.left h3': 'coll.attributes.0',
-                                            'header div.right a.tiny-action@href+': 'coll.attributes.0',
-
-                                            'ul li': {
-                                                'tweet<-coll.attributes.1': {
-                                                    'span.text': 'tweet.escaped_text',
-                                                    'span.tweet-link a@href':
-                                                    'http://twitter.com/#{tweet.user.screen_name}/statuses/#{tweet.id_str}',
-                                                    'span.tweet-link a': '@#{tweet.user.screen_name}'
-                                                }
-                                            },
-
-                                            '@class+': function(arg) {
-                                                return arg.pos + 1 == arg.length ? ' last' : ''
-                                            }
-                                        }
-                                    }
-                                }
-                            , compiled = $p(this.templateElem).compile(directives);
-
-                            $(this.el).html(compiled({collections: this.models.toArray()}));
-                        }
-                    })
-                , ctrl;
-
-                window.view = new View();
-
-                function onTweetsLoaded(data) {
-                    if (data.error) {
-                        alert(data.error)
-                        return
-                    }
-
-                    if (isLoaded) {
-                        console.log(data);
-                        return
-                    }
-
-                    isLoaded = true;
-                    window.view.models = new Collection(data.data);
-                    window.view.render();
-                    $('#sectionsPlaceholder').replaceWith(window.view.el);
-                }
-
-                $(document).ready(
-
-                    function() {
-
-                        socket.on('connect',
-                            function() {
-                                console.log(arguments);
-                                //socket.send({data: 'zomg wtf!'});
-                            }
-                        );
-
-                        socket.on('message',
-                            function(data) {
-                                onTweetsLoaded(data);
-                                console.log(arguments);
-                            }
-                        );
-
-                        socket.connect();
-
-                    }
-                );
-
-                /*
-                Controller = Backbone.Controller.extend({
-                    routes: {
-                        'home': 'home',
-                        'actions/mark-read/:id': 'markRead'
-                    },
-
-                    home: function() {
-                        console.log('home');
-                    },
-
-                    markRead: function(id) {
-                        console.log('Mark read: ' + id);
-                    }
-                });
-
-                ctrl = new Controller();
-
-                $(document).ready(
-                    function() {
-                        Backbone.history.start();
-                    }
-                );
-                */
-
-            })();
-        </script>
+        <script type="text/javascript" charset="utf-8" src="/media/js/ng/home.js"></script>
 
     </body>
 </html>
