@@ -3,9 +3,10 @@ var ng = require('ng')
 
 exports.tweets = function(req, res, next) {
 
-    ng.api.getGroupedTweets(req.ng.user,
+    ng.api.getGroupedTweets({
+        user: req.ng.user,
 
-        function(err, result) {
+        next: function(err, result) {
 
             if (err) {
                 ng.http.error(req, res, err, 'Unable to obtain tweets')
@@ -14,5 +15,5 @@ exports.tweets = function(req, res, next) {
 
             ng.http.writeJSON(res, result)
         }
-    )
+    })
 }

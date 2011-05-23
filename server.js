@@ -87,23 +87,23 @@ function onSocketReady(client, req, res) {
 
     function regularCheck() {
 
-        ng.api.getNewTweets(user, lastId,
-            function(err, result) {
+        ng.api.getNewTweets({
+            user: user, 
+            lastId: lastId,
+            next: function(err, result) {
                 if (err) {
                     sendSocketError(client, err)
                     return
                 }
 
-                if (result.length === 0) {
+                if (result.tweets.length === 0) {
                     return
                 }
 
-                lastIs = result.lastId
-                delete result.lastId
-
-                sendSocketData(client, result)
+                lastId = result.lastId
+                sendSocketData(client, result.tweets)
             }
-        )
+        })
     }
 
     client.on('message',
@@ -123,21 +123,20 @@ function onSocketReady(client, req, res) {
         }
     )
 
-    ng.api.getGroupedTweets(user,
-        function(err, result) {
+    ng.api.getGroupedTweets({
+        user: user,
+        next: function(err, result) {
             if (err) {
                 sendSocketError(client, err)
                 return
             }
             
             lastId = result.lastId
-            delete result.lastId
-
-            sendSocketData(client, result)
+            sendSocketData(client, result.tweets)
 
             intervalId = setInterval(regularCheck, 3000)
         }
-    )
+    })
 }
 
 

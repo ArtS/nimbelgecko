@@ -1,64 +1,63 @@
 $(document).ready(function() {
 
     var isLoaded = false
-        , socket = new io.Socket(null, {port: 8081, rememberTransport: false})
-        , TweetModel = Backbone.Model.extend({
-                            markAsRead: function() {
-                                this.set({is_read: true});
-                            }
-                        })
+      , socket = new io.Socket(null, {port: 8081, rememberTransport: false})
+      , TweetModel = Backbone.Model.extend({
+                          markAsRead: function() {
+                              this.set({is_read: true});
+                          }
+                      })
 
-        , Collection = Backbone.Collection.extend({
-                            model: TweetModel,
-                        })
+      , Collection = Backbone.Collection.extend({
+                          model: TweetModel,
+                     })
 
-        , View = Backbone.View.extend({
-
-                templateElem: $('#sectionsDiv'),
-                tweetTemplateElem : $('#tweetTemplate'),
-                
-                render: function() {
-
-                    var singleTweetDirective = 
-                        {
-                            'li': {
-                                'tweet<-tweets': {
-                                    'span.text': 'tweet.escaped_text',
-                                    'span.tweet-link a@href':
-                                    'http://twitter.com/#{tweet.user.screen_name}/statuses/#{tweet.id_str}',
-                                    'span.tweet-link a': '@#{tweet.user.screen_name}'
-                                }
-                            }
-                        }
-                      , singleTweetF = this.tweetTemplateElem.compile(singleTweetDirective)
-                      , directives = {
-
-                            'div.fourcol' : {
-
-                                'coll<-collections': {
-
-                                    'header div.left h3': 'coll.attributes.0',
-                                    'header div.right a.tiny-action@href+': 'coll.attributes.0',
-
-                                    'ul@id+': 'coll.attributes.0', 
-
-                                    'ul': function(ctx) {
-                                        debugger
-                                        return singleTweetF({tweets: ctx.item.attributes[1]})
-                                    },
-
-                                    '@class+': function(arg) {
-                                        return arg.pos + 1 == arg.length ? ' last' : ''
-                                    }
-                                }
-                            }
-                        }
-                    , compiled = $p(this.templateElem).compile(directives);
-
-                    $(this.el).html(compiled({collections: this.models.toArray()}));
+      , tweetTemplateElem = $('#tweetTemplate')
+      , singleTweetDirective = {
+            'li': {
+                'tweet<-tweets': {
+                    'span.text': 'tweet.escaped_text',
+                    'span.tweet-link a@href':
+                    'http://twitter.com/#{tweet.user.screen_name}/statuses/#{tweet.id_str}',
+                    'span.tweet-link a': '@#{tweet.user.screen_name}'
                 }
-            })
-        , ctrl;
+            }
+        }
+      , singleTweetF = tweetTemplateElem.compile(singleTweetDirective)
+      , View = Backbone.View.extend({
+
+            templateElem: $('#sectionsDiv'),
+            
+            
+            render: function() {
+
+                var directives = {
+
+                        'div.fourcol' : {
+
+                            'coll<-collections': {
+
+                                'header div.left h3': 'coll.attributes.0',
+                                'header div.right a.tiny-action@href+': 'coll.attributes.0',
+
+                                'ul@id+': 'coll.attributes.0', 
+
+                                'ul': function(ctx) {
+                                    return singleTweetF({tweets: ctx.item.attributes[1]})
+                                },
+
+                                '@class+': function(arg) {
+                                    return arg.pos + 1 == arg.length ? ' last' : ''
+                                }
+                            }
+                        }
+                    }
+                , compiled = $p(this.templateElem).compile(directives);
+
+                $(this.el).html(compiled({collections: this.models.toArray()}));
+            }
+        })
+      , ctrl;
 
     window.view = new View();
 
@@ -69,7 +68,18 @@ $(document).ready(function() {
         }
 
         if (isLoaded) {
-            console.log(data);
+
+            var tweets_data = data.data
+
+            _(tweets_data).each(function(tweets) {
+                var type = tweets[0]
+                  , messages = tweets[1]
+                  , section
+
+                section = $('#' + 'type_' + type)
+                section.prepend(singleTweetF({tweets: messages}))
+            })
+
             return
         }
 

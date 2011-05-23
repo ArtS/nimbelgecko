@@ -154,18 +154,13 @@ function saveUserDetails(params, callback) {
 }
 
 
-function getRecentTweets(options, next) {
+function getRecentTweets(options) {
     
-    console.log(options)
-
     var col = collections[TWEETS_COLLECTION],
         selectCriteria = {},
         userId
 
-    if (!options.userId) {
-        next('userId is not supplied for getRecentTweets')
-        return
-    }
+    ng.utils.checkRequiredOptions(options, ['userId', 'next'])
 
     if (typeof options.userId !== 'string') {
         userId = options.userId.toString()
@@ -190,18 +185,18 @@ function getRecentTweets(options, next) {
         },
         function(err, cursor) {
             if(err) {
-                next(err, null);
+                options.next(err, null);
                 return;
             }
 
             cursor.toArray(
                 function(err, arr) {
                     if(err) {
-                        next(err, null);
+                        options.next(err, null);
                         return;
                     }
                     
-                    next(null, arr);
+                    options.next(null, arr);
                 }
             );
 

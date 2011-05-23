@@ -1,53 +1,55 @@
 var ng = require('ng')
 
 
-function getGroupedTweets(user, next) {
-    
-    ng.db.getRecentTweets(
-        {userId: user.user_id},
+function getGroupedTweets(options) {
 
-        function(err, arr) {
-            var sorted,
-                key,
-                result = []
+    ng.utils.checkRequiredOptions(options, ['user', 'next'])
 
-            if (err) {
-                next(err)
-                return
+    var opts = {userId: options.user.user_id}
+
+    if (options.lastId) {
+        opts.lastId = options.lastId
+    }
+
+    function _recentTweetsCallback(err, arr) {
+
+        var sorted,
+            key,
+            result = {
+                lastId: null,
+                tweets: []
             }
 
-            result.lastId = arr[0].id_str
+        if (err) {
+            options.next(err)
+            return
+        }
 
-            sorted = ng.sorting.sortTweets(arr, user)
+        if (arr.length != 0) {
+            result.lastId = arr[0].id_str                   
+
+            sorted = ng.sorting.sortTweets(arr, options.user)
             for (key in sorted) {
                 if (!sorted.hasOwnProperty(key)) {
                     continue
                 }
-                result.push([key, sorted[key]])
+
+                result.tweets.push([key, sorted[key]])
             }
 
-            next(null, result)
         }
-    )
+
+        options.next(null, result)
+    }
+
+    opts.next = _recentTweetsCallback
+    ng.db.getRecentTweets(opts)
 }
 
 
-function getNewTweets(user, lastId, next) {
-
-    ng.db.getRecentTweets(
-        {
-            userId: user.user_id,
-            lastId: lastId
-        },
-        function (err, result) {
-            if (err) {
-                next(err)
-                return
-            }
-
-            next(null, result)
-        }
-    )
+function getNewTweets(options) {
+    ng.utils.checkRequiredOptions(options, ['user', 'lastId', 'next'])
+    getGroupedTweets(options)
 }
 
 
