@@ -1,76 +1,82 @@
-var mongo = require('mongodb'),
-    ng = require('ng'),
-    db = new mongo.Db(
+var _ = require('underscore')
+  , mongo = require('mongodb')
+  , ng = require('ng')
+  , db = new mongo.Db(
         'nimblegecko',
         new mongo.Server(
             'localhost', 
             mongo.Connection.DEFAULT_PORT, {}
         ), 
         {}
-    ),
-    mongoStore = require('connect-mongodb'),
-    log = require('log'),
-    models = require('models'),
-    USERS_COLLECTION = 'users',
-    TWEETS_COLLECTION = 'tweets',
-    OTHER_COLLECTION = 'other',
-    collections = {};
+    )
+  , mongoStore = require('connect-mongodb')
+  , log = require('log')
+  , models = require('models')
+  , USERS_COLLECTION = 'users'
+  , TWEETS_COLLECTION = 'tweets'
+  , OTHER_COLLECTION = 'other'
+  , collections = {}
 
 
-function _insertNewUser(params, callback) {
+function _insertNewUser(options) {
 
-    var users = collections[USERS_COLLECTION];
+    ng.utils.checkRequiredOptions(options, ['user', 'next'])
+
+    var users = collections[USERS_COLLECTION]
 
     users.insert(
         new models.User(
             {
-                user_id: params.user_id,
-                screen_name: params.screen_name,
-                oauth_access_token: params.oauth_access_token,
-                oauth_access_token_secret: params.oauth_access_token_secret
+                user_id: options.user.user_id,
+                screen_name: options.user.screen_name,
+                oauth_access_token: options.user.oauth_access_token,
+                oauth_access_token_secret: options.user.oauth_access_token_secret
             }
         ),
         function(err, doc) {
             if(err) {
-                return callback(err);
+                return options.next(err)
             }
 
-            return callback(null);
+            return options.next(null)
         }
-    );
+    )
 }
 
-function _updateExistingUser(params, doc, callback) {
+function _updateExistingUser(options) {
     
-    var users = collections[USERS_COLLECTION];
+    ng.utils.checkRequiredOptions(options, ['user', 'existingUser', 'next'])
 
-    doc.screen_name = params.screen_name;
-    doc.oauth_access_token = params.oauth_access_token;
-    doc.oauth_access_token_secret = params.oauth_access_token_secret;
+    var users = collections[USERS_COLLECTION]
+
+    // TODO: refactor into for-in loop?
+    options.existingUser.screen_name = options.user.screen_name
+    options.existingUser.oauth_access_token = options.user.oauth_access_token
+    options.existingUser.oauth_access_token_secret = options.user.oauth_access_token_secret
     
     users.save(
-        doc, 
+        options.existingUser, 
         function(err, docs) {
             if(err) {
-                callback(err);
-                return;
+                options.next(err)
+                return
             }
 
-            callback(null);
+            options.next(null)
         }
-    );
+    )
 }
 
 
 function saveUnknown(item, callback) {
-    var col = collections[OTHER_COLLECTION];
-    col.insert(item, callback);
+    var col = collections[OTHER_COLLECTION]
+    col.insert(item, callback)
 }
 
 
 function saveTweet(tweet, callback) {
 
-    var col = collections[TWEETS_COLLECTION];
+    var col = collections[TWEETS_COLLECTION]
 
     col.find(
 
@@ -79,8 +85,8 @@ function saveTweet(tweet, callback) {
         function(err, cursor) {
 
             if(err) {
-                callback(err);
-                return;
+                callback(err)
+                return
             }
 
             cursor.toArray(
@@ -88,69 +94,90 @@ function saveTweet(tweet, callback) {
                 function(err, arr) {
 
                     if(arr.length != 0) {
-                        return;
+                        return
                     }
 
-                    col.insert(tweet, callback);
+                    col.insert(tweet, callback)
                 }
-            ); 
+            ) 
         }
-    );
+    )
 }
 
 
 function getAllUserIds(callback) {
 
-    var users = collections[USERS_COLLECTION];
+    var users = collections[USERS_COLLECTION]
 
     users.find(
         function(err, cursor) {
             cursor.toArray(
                 function(err, arr) {
-                    var res = [],
-                        i = 0,
-                        length;
+                    var res = []
 
                     if (err) {
-                        callback(err);
-                        return;
+                        callback(err)
+                        return
                     }
                     
-                    length = arr.length;
-                    for (; i < length; i++) {
-                        if (arr[i].user_id) {
-                            res.push(arr[i].user_id);
-                        }
-                    }
+                    res = _(arr).chain()
+                            .select(function(user) { 
+                                return (typeof user.user_id !== 'undefined' &&
+                                        user.user_id !== null)
+                            })
+                            .map(function(user) {
+                                return user.user_id;
+                            }).value()
 
-                    callback(null, res);
+                    callback(null, res)
                 }
-            );
+            )
         }
-    );
+    )
 }
 
 
-function saveUserDetails(params, callback) {
+function saveUser(options) {
 
-    var users = collections[USERS_COLLECTION];
+    ng.utils.checkRequiredOptions(options, ['user', 'next'])
 
-    // First, check whether we already have this user's profile.
-    users.findOne(
-        { user_id: params.user_id },
-        function(err, doc) {
+    var users = collections[USERS_COLLECTION]
+
+    // Check whether user's already registered
+    getUserById({
+        userId: options.user.user_id,
+        next: function(err, user) {
+
             if (err) {
-                callback(err);
-                return;                
+                options.next(err)
+                return                
             }
 
-            if (typeof doc === 'undefined' || doc === null) {
-                _insertNewUser(params, callback);
+            if (typeof user === 'undefined' || user === null) {
+
+                _insertNewUser(options)
+
             } else {
-                _updateExistingUser(params, doc, callback);
+
+                _updateExistingUser({
+                    user: options.user,
+                    existingUser: user, 
+                    next: options.next
+                })
+
             }
         }
-    );
+    })
+}
+
+
+function getUserById(options) {
+    
+    ng.utils.checkRequiredOptions(options, ['userId', 'next'])
+    
+    var users = collections[USERS_COLLECTION]
+
+    users.findOne({user_id: options.userId}, options.next)
 }
 
 
@@ -185,23 +212,23 @@ function getRecentTweets(options) {
         },
         function(err, cursor) {
             if(err) {
-                options.next(err, null);
-                return;
+                options.next(err, null)
+                return
             }
 
             cursor.toArray(
                 function(err, arr) {
                     if(err) {
-                        options.next(err, null);
-                        return;
+                        options.next(err, null)
+                        return
                     }
                     
-                    options.next(null, arr);
+                    options.next(null, arr)
                 }
-            );
+            )
 
         }
-    );
+    )
 }
 
 
@@ -210,10 +237,10 @@ function _isFieldPresent(elem, field_name) {
     if (elem[field_name] === undefined ||
         elem[field_name] === null) {
 
-        return false;
+        return false
     }
 
-    return true;
+    return true
 }
 
 
@@ -229,13 +256,13 @@ function saveStreamItem(item) {
                            item.for_user.toString())
     
     if (!_isFieldPresent(item, 'for_user')) {
-        ng.log.error('No \'for_user\' field found in ' + JSON.stringify(item));
-        return;
+        ng.log.error('No \'for_user\' field found in ' + JSON.stringify(item))
+        return
     }
 
     if (!_isFieldPresent(item, 'message')) {
-        ng.log.error('No \'message\' field found in ' + JSON.stringify(item));
-        return;
+        ng.log.error('No \'message\' field found in ' + JSON.stringify(item))
+        return
     }
 
     msg = item.message
@@ -249,14 +276,14 @@ function saveStreamItem(item) {
         saveTweet(msg, 
             function(err) {
                 if (err) {
-                    ng.log.error(err, 'Error while saving a tweet');
+                    ng.log.error(err, 'Error while saving a tweet')
                 }
             }
-        );
+        )
 
         ng.log.log('Saved tweet: \n' +
                  msg.user.screen_name +': ' + 
-                 msg.text);
+                 msg.text)
     } else {
         //
         // Unknown type of message
@@ -264,12 +291,12 @@ function saveStreamItem(item) {
         saveUnknown(msg, 
             function(err) {
                 if (err) {
-                    ng.log.error(err, 'Error while saving an unknown entity.');
+                    ng.log.error(err, 'Error while saving an unknown entity.')
                 }
             }
-        );
+        )
 
-        ng.log.log('Saved unknown: ' + JSON.stringify(msg));
+        ng.log.log('Saved unknown: ' + JSON.stringify(msg))
     }
 }
 
@@ -326,49 +353,49 @@ function getLastTweetId(user_id, callback) {
 
 function initDatabase(colNames, onDatabaseReady) {
 
-    var collectionsCopy;
+    var collectionsCopy
 
     if (!Array.isArray(colNames)) {
         throw {
             name: 'InvalidArgumentException',
             message: 'collections parameter must be an array.' 
-        };
+        }
     }
 
-    collectionsCopy = colNames.splice(0);
+    collectionsCopy = colNames.splice(0)
 
     // Recursive function for initialising all the collections
     // supplied in 'colNames' parameter to initDatabase()
     function _initCollections() {
-        var colName = collectionsCopy.pop(0);
+        var colName = collectionsCopy.pop(0)
         if(colName === undefined) {
-            onDatabaseReady(null);
-            return;
+            onDatabaseReady(null)
+            return
         }
 
         db.collection(
             colName, 
             function(err, collection) {
                 if (err) {
-                    onDatabaseReady(err);
-                    return;
+                    onDatabaseReady(err)
+                    return
                 }
 
-                collections[colName] = collection;
-                _initCollections();
+                collections[colName] = collection
+                _initCollections()
             }
-        );
+        )
     }
 
     db.open(
         function(err, db) {
             if(err) {
-                onDatabaseReady(err);
+                onDatabaseReady(err)
             }
 
-            _initCollections();
+            _initCollections()
         }
-    );
+    )
 }
 
 
@@ -382,7 +409,8 @@ exports.mongoStore = mongoStore({
 
 exports.collections = collections
 exports.initDatabase = initDatabase
-exports.saveUserDetails = saveUserDetails
+exports.saveUser = saveUser
+exports.getUserById = getUserById
 exports.getRecentTweets = getRecentTweets
 exports.saveUnknown = saveUnknown
 exports.saveTweet = saveTweet

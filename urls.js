@@ -3,8 +3,8 @@ var ng = require('ng'),
 
 exports.urls = [
     {
-        url: '/register', 
-        view: ng.views.oauth.register
+        url: '/login', 
+        view: ng.views.oauth.login
     },
     {
         url: '/oauth/callback',
