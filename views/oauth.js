@@ -65,7 +65,7 @@ exports.callback = function(req, res, next) {
                                     return
                                 }
 
-                                ng.db.
+                                //ng.db.
                             }
                         })
                         storeUserAndGoHome(user)

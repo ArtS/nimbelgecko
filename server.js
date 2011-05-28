@@ -169,7 +169,13 @@ function startServer() {
                         socketIO(function() { return server; }, onSocketReady),
                         connect.bodyParser(),
                         connect.cookieParser(),
-                        connect.session({store: ng.db.mongoStore, secret: 'blah'}),
+                        connect.session({
+                                            store: ng.db.getMongoStore(),
+                                            secret: 'blah',
+                                            cookieSession: {
+                                                maxAge: 604800000
+                                            }
+                                        }),
                         connect.router(routes),
                         connect.static('./static')
                     )

@@ -1,14 +1,7 @@
 var _ = require('underscore')
   , mongo = require('mongodb')
   , ng = require('ng')
-  , db = new mongo.Db(
-        'nimblegecko',
-        new mongo.Server(
-            'localhost', 
-            mongo.Connection.DEFAULT_PORT, {}
-        ), 
-        {}
-    )
+  , db = null
   , mongoStore = require('connect-mongodb')
   , log = require('log')
   , models = require('models')
@@ -356,8 +349,10 @@ function initDatabase(colNames, onDatabaseReady) {
 
     collectionsCopy = colNames.splice(0)
 
-    // Recursive function for initialising all the collections
-    // supplied in 'colNames' parameter to initDatabase()
+    //
+    // Recursive function for initialising all collections
+    // supplied in 'colNames' parameter
+    //
     function _initCollections() {
         var colName = collectionsCopy.pop(0)
         if(colName === undefined) {
@@ -379,6 +374,20 @@ function initDatabase(colNames, onDatabaseReady) {
         )
     }
 
+    console.log(ng.conf.databaseName)
+    console.log(ng.conf.databaseHost)
+    console.log(ng.conf.databasePort)
+
+    db = new mongo.Db(
+        ng.conf.databaseName,
+        new mongo.Server(
+            ng.conf.databaseHost, 
+            ng.conf.databasePort, 
+            {}
+        ),
+        {}
+    )
+
     db.open(
         function(err, db) {
             if(err) {
@@ -395,9 +404,14 @@ function initDatabase(colNames, onDatabaseReady) {
 // Exports
 //
 
-exports.mongoStore = mongoStore({
-    'collection': 'session_store',
-})
+exports.getMongoStore = function() {
+    return new mongoStore({
+        host: ng.conf.databaseHost,
+        port: ng.conf.databasePort,
+        dbname: ng.conf.databaseName,
+        collection: ng.conf.sessionStoreName
+    })
+}
 
 exports.collections = collections
 exports.initDatabase = initDatabase
