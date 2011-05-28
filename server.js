@@ -115,7 +115,8 @@ function onSocketReady(client, req, res) {
     client.on('disconnect',
         function() {
 
-            console.log(user.user_id + ' disconnected');
+            var id = user ? user.user_id : ''
+            console.log(id + ' disconnected');
 
             if (intervalId !== null) {
                 clearTimeout(intervalId)

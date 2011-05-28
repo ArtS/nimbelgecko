@@ -172,14 +172,11 @@ function getRecentTweets(options) {
 
     if (typeof options.lastId !== "undefined") {
         selectCriteria.id_str = {$gt: options.lastId}
-    }    
-
-    console.log('selectCriteria')
-    console.log(selectCriteria)
+    }
 
     col.find(
         selectCriteria,
-        { 
+        {
             limit: 300,
             sort: [['id', 'desc']]
         },
@@ -195,7 +192,7 @@ function getRecentTweets(options) {
                         options.next(err, null);
                         return;
                     }
-                    
+
                     options.next(null, arr);
                 }
             );
