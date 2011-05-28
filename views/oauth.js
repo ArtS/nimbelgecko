@@ -27,16 +27,14 @@ exports.callback = function(req, res, next) {
         oauth_credentials.oauth_token_secret,
         oauth_verifier,
 
-        function(error, oauth_access_token, oauth_access_token_secret, results2) {
-
-            var user
+        function(error, oauth_access_token, oauth_access_token_secret, oauth_data) {
 
             if(error) {
                 ng.http.error(req, res, err)
                 return
             }
 
-            function storeUserInSession(user) {
+            function storeUserAndGoHome(user) {
                 ng.session.setLoggedInUser(req, user)
                 ng.http.redirect(res, '/home')
             }
@@ -45,8 +43,8 @@ exports.callback = function(req, res, next) {
 
                 var user = new ng.models.User(
                     {
-                        user_id: results2.user_id,
-                        screen_name: results2.screen_name,
+                        user_id: oauth_data.user_id,
+                        screen_name: oauth_data.screen_name,
                         oauth_access_token: oauth_access_token,
                         oauth_access_token_secret: oauth_access_token_secret
                     }
@@ -60,13 +58,23 @@ exports.callback = function(req, res, next) {
                             return
                         }
 
-                        storeUserInSession(user)
+                        ng.db.getRecentTweets({
+                            userId: user.user_id,
+                            next: function(err, tweets) {
+                                if (err) {
+                                    return
+                                }
+
+                                ng.db.
+                            }
+                        })
+                        storeUserAndGoHome(user)
                     }
                 })
             }
 
             ng.db.getUserById({
-                userId: results2.user_id,
+                userId: oauth_data.user_id,
                 next: function(err, user) {
                     if (err) {
                         ng.http.error(req, res, err)
@@ -76,7 +84,7 @@ exports.callback = function(req, res, next) {
                     if (user === null || typeof user === "undefined") {
                         createNewUser()
                     } else {
-                        storeUserInSession(user)
+                        storeUserAndGoHome(user)
                     }
                 }
             })

@@ -183,26 +183,20 @@ function getUserById(options) {
 
 function getRecentTweets(options) {
     
-    var col = collections[TWEETS_COLLECTION],
-        selectCriteria = {},
-        userId
-
     ng.utils.checkRequiredOptions(options, ['userId', 'next'])
 
-    if (typeof options.userId !== 'string') {
-        userId = options.userId.toString()
-    } else {
-        userId = options.userId
-    }
+    var col = collections[TWEETS_COLLECTION]
+      , selectCriteria = {}
 
-    selectCriteria.for_user = userId
+    if (typeof options.userId !== 'string') {
+        selectCriteria.for_user = options.userId.toString()
+    } else {
+        selectCriteria.for_user = options.userId
+    }
 
     if (typeof options.lastId !== "undefined") {
         selectCriteria.id_str = {$gt: options.lastId}
     }    
-
-    console.log('selectCriteria')
-    console.log(selectCriteria)
 
     col.find(
         selectCriteria,
@@ -226,7 +220,6 @@ function getRecentTweets(options) {
                     options.next(null, arr)
                 }
             )
-
         }
     )
 }
