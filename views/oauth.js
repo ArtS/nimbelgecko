@@ -34,7 +34,7 @@ exports.callback = function(req, res, next) {
                 return
             }
 
-            function storeUserAndGoHome(user) {
+            function storeUserToSessionAndGoHome(user) {
                 ng.session.setLoggedInUser(req, user)
                 ng.http.redirect(res, '/home')
             }
@@ -53,22 +53,28 @@ exports.callback = function(req, res, next) {
                 ng.db.saveUser({
                     user: user,
                     next: function(err) {
+
+                        debugger
+
                         if(err) {
                             ng.http.error(req, res, err, 'Error saving user details')
                             return
                         }
 
-                        ng.db.getRecentTweets({
-                            userId: user.user_id,
+                        ng.api.getLatestTweetsFromTwitter({
+                            user: user,
                             next: function(err, tweets) {
                                 if (err) {
                                     return
                                 }
 
-                                //ng.db.
+                                _(tweets).each(function(tweet) {
+                                    ng.db.saveTweet({tweet: tweet})
+                                })
                             }
                         })
-                        storeUserAndGoHome(user)
+
+                        storeUserToSessionAndGoHome(user)
                     }
                 })
             }
@@ -82,9 +88,10 @@ exports.callback = function(req, res, next) {
                     }
 
                     if (user === null || typeof user === "undefined") {
+                        console.log('new user: ' + user)
                         createNewUser()
                     } else {
-                        storeUserAndGoHome(user)
+                        storeUserToSessionAndGoHome(user)
                     }
                 }
             })

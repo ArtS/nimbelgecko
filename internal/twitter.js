@@ -7,13 +7,21 @@ var sys = require('sys'),
     _ = require('underscore')._
 
 
-function oAuthGet(url, params, callback) {
+function oAuthGet(options) {
 
-    var url_params = params || {},
-        auth,
-        args;
+    ng.utils.checkRequiredOptions(options, ['url',
+                                            'oauth_token',
+                                            'oauth_token_secret'])
+    var url = options.url
+      , params = options.params || {}
+      , next = options.next || null
+      , oauth_token = options.oauth_token
+      , oauth_token_secret = options.oauth_token_secret
+      , auth
+      , args
 
-    url += '?' + querystring.stringify(url_params);
+    //TODO: use proper Url lib, if available
+    url += '?' + querystring.stringify(params)
 
     auth = new oAuth(
         'https://api.twitter.com/oauth/request_token',
@@ -23,79 +31,72 @@ function oAuthGet(url, params, callback) {
         '1.0A',
         null,
         'HMAC-SHA1'
-    );
+    )
 
     function oAuthCallback(err, data, response) {
 
         if(err) {
-            callback(err, null);
-            return;
+            next(err, null)
+            return
         }
 
-        ng.log.data(data);
+        ng.log.data(data)
 
-        data = JSON.parse(data);
-        callback(null, data);
+        data = JSON.parse(data)
+        next(null, data)
     }
 
-    args = [
-        url,
-        ng.conf.oauth_token,
-        ng.conf.oauth_token_secret
-    ];
+    args = [url, oauth_token, oauth_token_secret]
 
-    if (callback !== undefined) {
-        args.push(oAuthCallback);
+    if (next !== undefined) {
+        args.push(oAuthCallback)
     }
 
-    return auth.get.apply(auth, args);
+    return auth.get.apply(auth, args)
 }
 
 
+function retrieveTweets(options) {
 
+    ng.utils.checkRequiredOptions(options, ['next', 
+                                            'oauth_token',
+                                            'oauth_token_secret'])
+    var next = options.next
+      , params = options.params || {}
 
-function retrieveTweets(params, callback) {
-
-    var url_params = params || {};
-
-    if((params != null && typeof params != "undefined") && (params.since_id != null)) {
-        ng.log.log('Retrieving historical tweets, starting from id ' + params.since_id);
+    if((params !== null && typeof params !== "undefined") && params.since_id !== null) {
+        ng.log.log('Retrieving historical tweets, starting from id ' + params.since_id)
     } else {
-        ng.log.log('Retrieving all tweets');
+        ng.log.log('Retrieving all tweets')
     }
 
-    var url = 'https://api.twitter.com/1/statuses/home_timeline.json';
+    var url = 'https://api.twitter.com/1/statuses/home_timeline.json'
 
-    return oAuthGet(url, url_params, callback);
-}
-
-
-function retrieveNewTweets(onNewTweetsRetrieved) {
-
-    retrieveTweets(
-        {},
-        function(err, tweets) {
-            if(err) {
-                utils.printError(err, 'Unable to retrieve tweets (2)'); 
-
-                // Re-try after 2 minutes
-                utils.retryOnError(
-                    function() { retrieveNewTweets(onNewTweetsRetrieved); }
-                );
-            }
-
-            onNewTweetsRetrieved(null, tweets);
-        }
-    );
+    return oAuthGet({
+        url: url
+      , params: params
+      , next: next
+      , oauth_token: options.oauth_token
+      , oauth_token_secret: options.oauth_token_secret
+    })
 }
 
 
 function startStreaming(ids_to_follow) {
 
     var url = 'http://betastream.twitter.com/2b/site.json',
-        ids_str = ids_to_follow.join(',');
+        ids_str = ids_to_follow.join(',')
 
-    return oAuthGet(url, {replies: 'all', with: 'followings', follow: ids_str});
+    return oAuthGet({
+        url: url, 
+        params: {replies: 'all', with: 'followings', follow: ids_str},
+
+        // This uses nimblegecko credentials from DB,
+        // and God forbid you from ever changing those in Twitter
+        // via re-authentication (banning and then enabling again or any other way)
+        oauth_token: ng.conf.oauth_token,
+        oauth_token_secret: ng.conf.oauth_token_secret
+    })
 }
 
 
@@ -166,7 +167,11 @@ function ReceivingStream(allUserIds) {
             function(piece) {
                 try {
                     js_piece = JSON.parse(piece)
+
+                    // TODO: this introduces tight coupling to ng.db module
+                    // possibly untangle that
                     ng.db.saveStreamItem(js_piece)
+
                 } catch (err){
                     ng.log.error('error: ' + err)
                 }
@@ -185,24 +190,10 @@ function ReceivingStream(allUserIds) {
     }
 }
 
+
 ReceivingStream.prototype = new EventEmitter()
 
 
-function getAllRecentTweets(user_ids, callback) {
-    _(user_ids).each(function(user_id) {
-        db.getLastTweetId(user_id,
-            function(err, tweet_id) {
-                // TODO: Add calls to db. to fugure out token_secret,
-                //       Add calls to twitter. to get the last tweets for given tweet_id & token_secret
-                //       Save received tweets
-            }
-        )
-    })
-}
-
-
-exports.oAuthGet = oAuthGet
-exports.retrieveNewTweets = retrieveNewTweets
 exports.retrieveTweets = retrieveTweets
 exports.startStreaming = startStreaming
 exports.ReceivingStream = ReceivingStream

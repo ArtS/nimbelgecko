@@ -1,21 +1,20 @@
-var util = require('util'),
-    fs = require('fs'),
-    util = require('util'),
-    plain_file = fs.createWriteStream(
+var util = require('util')
+  , fs = require('fs')
+  , plain_file = fs.createWriteStream(
         'plain.log',
         {
             flags: 'a',
             encoding: 'utf8'
         }
-    ),
-    data_file = fs.createWriteStream(
+    )
+  , data_file = fs.createWriteStream(
         'data.log',
         {
             flags: 'a',
             encoding: 'utf8'
         }
-    ),
-    log_file = fs.createWriteStream(
+    )
+  , log_file = fs.createWriteStream(
         'sys.log',
         {
             flags: 'a',

@@ -87,8 +87,8 @@ function onSocketReady(client, req, res) {
 
     function regularCheck() {
 
-        ng.api.getNewTweets({
-            user: user, 
+        ng.api.getNewTweetsFromDB({
+            user: user,
             lastId: lastId,
             next: function(err, result) {
                 if (err) {
@@ -180,6 +180,8 @@ function startServer() {
                         connect.static('./static')
                     )
 
+                    ng.log.log('Starting HTTP Server: ' + ng.conf.server_ip + ':' + ng.conf.server_port)
+                    console.log()
                     server.listen(ng.conf.server_port, ng.conf.server_ip);
 
                 }

@@ -47,11 +47,24 @@ function getGroupedTweets(options) {
 }
 
 
-function getNewTweets(options) {
+function getNewTweetsFromDB(options) {
     ng.utils.checkRequiredOptions(options, ['user', 'lastId', 'next'])
     getGroupedTweets(options)
 }
 
 
+function getLatestTweetsFromTwitter(options) {
+
+    ng.utils.checkRequiredOptions(options, ['user', 'next'])
+
+    ng.twitter.retrieveTweets({
+        oauth_token: options.user.oauth_access_token,
+        oauth_secret: options.user.oauth_access_token_secret,
+        next: options.next
+    })
+}
+
+
 exports.getGroupedTweets = getGroupedTweets
-exports.getNewTweets = getNewTweets
+exports.getNewTweetsFromDB = getNewTweetsFromDB
+exports.getLatestTweetsFromTwitter = getLatestTweetsFromTwitter

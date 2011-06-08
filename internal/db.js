@@ -67,9 +67,14 @@ function saveUnknown(item, callback) {
 }
 
 
-function saveTweet(tweet, callback) {
+function saveTweet(options) {
+
+    ng.utils.checkRequiredOptions(options, ['tweet'])
+    
 
     var col = collections[TWEETS_COLLECTION]
+      , tweet = options.tweet
+      , next = options.next || _saveTweetErrorHandler
 
     col.find(
 
@@ -78,7 +83,7 @@ function saveTweet(tweet, callback) {
         function(err, cursor) {
 
             if(err) {
-                callback(err)
+                next(err)
                 return
             }
 
@@ -90,7 +95,7 @@ function saveTweet(tweet, callback) {
                         return
                     }
 
-                    col.insert(tweet, callback)
+                    col.insert(tweet, next)
                 }
             ) 
         }
@@ -229,6 +234,13 @@ function _isFieldPresent(elem, field_name) {
 }
 
 
+function _saveTweetErrorHandler(err) {
+    if (err) {
+        ng.log.error(err, 'Error while saving a tweet')
+    }
+}
+
+
 // 
 // Saves either a tweet or an unknown object.
 // Invoked from the stream receiving routine
@@ -258,17 +270,19 @@ function saveStreamItem(item) {
 
         msg.is_read = false
 
-        saveTweet(msg, 
-            function(err) {
+        saveTweet({
+            tweet: msg, 
+            next: function(err) {
                 if (err) {
-                    ng.log.error(err, 'Error while saving a tweet')
-                }
-            }
-        )
+                    _saveTweetErrorHandler(err)
+                    return
+                }   
 
-        ng.log.log('Saved tweet: \n' +
-                 msg.user.screen_name +': ' + 
-                 msg.text)
+                ng.log.log('Saved tweet: \n' +
+                           msg.user.screen_name +': ' +
+                           msg.text)
+            }
+        })
     } else {
         //
         // Unknown type of message
