@@ -64,10 +64,14 @@ function retrieveTweets(options) {
     var next = options.next
       , params = options.params || {}
 
-    if((params !== null && typeof params !== "undefined") && params.since_id !== null) {
+    if (params.sinceId !== null && params.since_id !== undefined) {
         ng.log.log('Retrieving historical tweets, starting from id ' + params.since_id)
     } else {
-        ng.log.log('Retrieving all tweets')
+        if (params.maxId !== null && params.maxId !== undefined) {
+            ng.log.log('Retrieving historical tweets, before id ' + params.max_id)
+        } else {
+            ng.log.log('Retrieving all tweets')
+        }
     }
 
     var url = 'https://api.twitter.com/1/statuses/home_timeline.json'

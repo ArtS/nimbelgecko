@@ -7,13 +7,13 @@ require.paths.unshift('./internal');
 require('extensions');
 
 
-var util = require('util'),
-    connect = require('connect'),
-    ng = require('ng'),
-    urls = require('urls').urls,
-    io = require('socket.io')
-    socketIO = require('socket.io-connect').socketIO
-
+var util = require('util')
+  , connect = require('connect')
+  , ng = require('ng')
+  , urls = require('urls').urls
+  , io = require('socket.io')
+  , socketIO = require('socket.io-connect').socketIO
+  , server = null
 
 
 function bindUrls(app, url) {
@@ -74,7 +74,7 @@ function routes(app) {
 function onSocketReady(client, req, res) {
 
     var user = ng.session.getLoggedInUser(req),
-        lastId = null,
+        sinceId = null,
         intervalId = null
 
     function sendSocketError(client, err) {
@@ -87,9 +87,9 @@ function onSocketReady(client, req, res) {
 
     function regularCheck() {
 
-        ng.api.getNewTweetsFromDB({
+        ng.api.getGroupedTweetsFromDB({
             user: user,
-            lastId: lastId,
+            sinceId: sinceId,
             next: function(err, result) {
                 if (err) {
                     sendSocketError(client, err)
@@ -100,7 +100,7 @@ function onSocketReady(client, req, res) {
                     return
                 }
 
-                lastId = result.lastId
+                sinceId = result.sinceId
                 sendSocketData(client, result.tweets)
             }
         })
@@ -124,15 +124,16 @@ function onSocketReady(client, req, res) {
         }
     )
 
-    ng.api.getGroupedTweets({
+    ng.api.getGroupedTweetsFromDB({
         user: user,
         next: function(err, result) {
+
             if (err) {
                 sendSocketError(client, err)
                 return
             }
             
-            lastId = result.lastId
+            sinceId = result.sinceId
             sendSocketData(client, result.tweets)
 
             intervalId = setInterval(regularCheck, 3000)
@@ -155,8 +156,6 @@ function startServer() {
             ng.db.initDatabase(['tweets', 'users'],
 
                 function(err) {
-
-                    var server
 
                     if(err) {
                         ng.log.error(err, 'Database initialisation failed.');
@@ -194,7 +193,16 @@ function startServer() {
 process.on('uncaughtException',
     function(err) {
         ng.log.error(err, 'Unhandled exception')
-        startServer()
+        try {
+            if (server) {
+                server.close()
+                server = null
+            }
+        } catch(ex) {
+            ng.log.error(ex, 'Exception while trying to shut down the server')
+        } finally { 
+            startServer()
+        }
     }
 )
 

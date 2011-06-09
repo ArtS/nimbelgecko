@@ -1,9 +1,9 @@
-var URL = require('url'),
-    util = require('util'),
-    qs = require('querystring'),
-    ng = require('ng'),
-    OAUTH_CREDENTIALS = 'oAuthCredentials'
-
+var URL = require('url')
+  , util = require('util')
+  , qs = require('querystring')
+  , ng = require('ng')
+  , _ = require('underscore')
+  , OAUTH_CREDENTIALS = 'oAuthCredentials'
 
 exports.callback = function(req, res, next) {
 
@@ -54,8 +54,6 @@ exports.callback = function(req, res, next) {
                     user: user,
                     next: function(err) {
 
-                        debugger
-
                         if(err) {
                             ng.http.error(req, res, err, 'Error saving user details')
                             return
@@ -65,11 +63,16 @@ exports.callback = function(req, res, next) {
                             user: user,
                             next: function(err, tweets) {
                                 if (err) {
+                                    //TODO: fix 'Error: socket hang up' issue
+                                    debugger
                                     return
                                 }
 
                                 _(tweets).each(function(tweet) {
-                                    ng.db.saveTweet({tweet: tweet})
+                                    ng.db.saveStreamItem({ 
+                                        for_user: user.user_id,
+                                        message: tweet
+                                    })
                                 })
                             }
                         })
@@ -88,7 +91,6 @@ exports.callback = function(req, res, next) {
                     }
 
                     if (user === null || typeof user === "undefined") {
-                        console.log('new user: ' + user)
                         createNewUser()
                     } else {
                         storeUserToSessionAndGoHome(user)

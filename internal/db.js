@@ -67,42 +67,6 @@ function saveUnknown(item, callback) {
 }
 
 
-function saveTweet(options) {
-
-    ng.utils.checkRequiredOptions(options, ['tweet'])
-    
-
-    var col = collections[TWEETS_COLLECTION]
-      , tweet = options.tweet
-      , next = options.next || _saveTweetErrorHandler
-
-    col.find(
-
-        { id_str: tweet.id_str }, {},
-
-        function(err, cursor) {
-
-            if(err) {
-                next(err)
-                return
-            }
-
-            cursor.toArray(
-
-                function(err, arr) {
-
-                    if(arr.length != 0) {
-                        return
-                    }
-
-                    col.insert(tweet, next)
-                }
-            ) 
-        }
-    )
-}
-
-
 function getAllUserIds(callback) {
 
     var users = collections[USERS_COLLECTION]
@@ -192,8 +156,8 @@ function getRecentTweets(options) {
         selectCriteria.for_user = options.userId
     }
 
-    if (typeof options.lastId !== "undefined") {
-        selectCriteria.id_str = {$gt: options.lastId}
+    if (typeof options.sinceId !== "undefined") {
+        selectCriteria.id_str = {$gt: options.sinceId}
     }
 
     col.find(
@@ -203,6 +167,7 @@ function getRecentTweets(options) {
             sort: [['id', 'desc']]
         },
         function(err, cursor) {
+
             if(err) {
                 options.next(err, null)
                 return
@@ -237,7 +202,45 @@ function _isFieldPresent(elem, field_name) {
 function _saveTweetErrorHandler(err) {
     if (err) {
         ng.log.error(err, 'Error while saving a tweet')
+    } else {
+        ng.log.log('Saved tweet OK')
     }
+}
+
+
+function saveTweet(options) {
+
+    ng.utils.checkRequiredOptions(options, ['tweet'])
+    
+
+    var col = collections[TWEETS_COLLECTION]
+      , tweet = options.tweet
+      , next = options.next || _saveTweetErrorHandler
+
+    col.find(
+
+        { id_str: tweet.id_str }, {},
+
+        function(err, cursor) {
+
+            if(err) {
+                next(err)
+                return
+            }
+
+            cursor.toArray(
+
+                function(err, arr) {
+
+                    if(arr.length != 0) {
+                        return
+                    }
+
+                    col.insert(tweet, next)
+                }
+            ) 
+        }
+    )
 }
 
 
@@ -433,7 +436,6 @@ exports.saveUser = saveUser
 exports.getUserById = getUserById
 exports.getRecentTweets = getRecentTweets
 exports.saveUnknown = saveUnknown
-exports.saveTweet = saveTweet
 exports.getAllUserIds = getAllUserIds
 exports.saveStreamItem = saveStreamItem
 exports.getLastTweetId = getLastTweetId

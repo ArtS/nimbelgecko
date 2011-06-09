@@ -3,7 +3,7 @@ var ng = require('ng')
 
 exports.tweets = function(req, res, next) {
 
-    ng.api.getGroupedTweets({
+    ng.api.getGroupedTweetsFromDB({
         user: req.ng.user,
 
         next: function(err, result) {

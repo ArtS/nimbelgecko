@@ -1,14 +1,15 @@
 var ng = require('ng')
+  , _ = require('underscore')
 
 
-function getGroupedTweets(options) {
+function getGroupedTweetsFromDB(options) {
 
     ng.utils.checkRequiredOptions(options, ['user', 'next'])
 
     var opts = {userId: options.user.user_id}
 
-    if (options.lastId) {
-        opts.lastId = options.lastId
+    if (options.sinceId) {
+        opts.sinceId = options.sinceId
     }
 
     function _recentTweetsCallback(err, arr) {
@@ -16,7 +17,7 @@ function getGroupedTweets(options) {
         var sorted,
             key,
             result = {
-                lastId: null,
+                sinceId: null,
                 tweets: []
             }
 
@@ -26,7 +27,8 @@ function getGroupedTweets(options) {
         }
 
         if (arr.length != 0) {
-            result.lastId = arr[0].id_str                   
+
+            result.sinceId = arr[0].id_str                   
 
             sorted = ng.sorting.sortTweets(arr, options.user)
             for (key in sorted) {
@@ -47,24 +49,60 @@ function getGroupedTweets(options) {
 }
 
 
-function getNewTweetsFromDB(options) {
-    ng.utils.checkRequiredOptions(options, ['user', 'lastId', 'next'])
-    getGroupedTweets(options)
-}
-
-
 function getLatestTweetsFromTwitter(options) {
 
     ng.utils.checkRequiredOptions(options, ['user', 'next'])
 
-    ng.twitter.retrieveTweets({
-        oauth_token: options.user.oauth_access_token,
-        oauth_secret: options.user.oauth_access_token_secret,
-        next: options.next
-    })
+    var minId = null
+      , results = []
+
+    function _isEndReached(err, tweets) {
+
+        if (err) {
+            options.next(err)
+            return
+        }
+
+        if (tweets.length === 0 ||
+            tweets[tweets.length - 1].id_str == minId) {
+            ng.log.log('No more tweets to receive, returning.')
+            options.next(null, results)
+            return
+        }
+
+        _(tweets).each(function(tweet) { 
+            if (tweet.id_str == minId) {
+                return
+            }
+            results.push(tweet) 
+        })
+
+        minId = tweets[tweets.length - 1].id_str
+
+        ng.log.log('Received ' + tweets.length + ' from history')
+        ng.log.log('Oldest id: ' + minId)
+
+        _retrieveBunch()
+    }
+
+    function _retrieveBunch() {
+        var o = {
+            oauth_token: options.user.oauth_access_token,
+            oauth_token_secret: options.user.oauth_access_token_secret,
+            next: _isEndReached,
+            params: {count: 200}
+        }
+
+        if (minId !== null) {
+            o.params.max_id = minId
+        }
+
+        ng.twitter.retrieveTweets(o)
+    }
+
+    _retrieveBunch()
 }
 
 
-exports.getGroupedTweets = getGroupedTweets
-exports.getNewTweetsFromDB = getNewTweetsFromDB
+exports.getGroupedTweetsFromDB = getGroupedTweetsFromDB
 exports.getLatestTweetsFromTwitter = getLatestTweetsFromTwitter
