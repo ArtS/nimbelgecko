@@ -48,7 +48,7 @@ function oAuthGet(options) {
 
     args = [url, oauth_token, oauth_token_secret]
 
-    if (next !== undefined) {
+    if (next !== null) {
         args.push(oAuthCallback)
     }
 
