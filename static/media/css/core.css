@@ -46,6 +46,19 @@ img::-moz-selection {background: transparent;}
 /*- LET'S GET STARTED!
 ----------------------------------------------------------------------*/
 
+.clear {
+    clear: both;
+}
+
+.left {
+    float: left;
+}
+
+.right {
+    float: right;
+}
+
+
 body {
 	background-color: #e8e8e8;
 	color: #3c3c3c;
@@ -98,6 +111,10 @@ header h2 {
 header h3 {
     font-size: 16px;
     line-height: 22px;
+}
+
+footer.copyright {
+    margin: 20px 0px 20px 0px;
 }
 
 /*
@@ -196,8 +213,11 @@ a.tiny-action {
 
 /* end Links */
 
-p small {
-    font-size: 13px;
+/*
+ * Lists
+ */
+
+ul.list-tweets {
 }
 
 li.list-item-tweet {
@@ -206,24 +226,20 @@ li.list-item-tweet {
     line-height: 16px;
 }
 
-.clear {
-    clear: both;
-}
-
-.left {
-    float: left;
-}
-
-.right {
-    float: right;
+ul.list-tweets li.list-item-tweet {
+    list-style: none;
 }
 
 /*
- * Lists
+ * End Lists
  */
-ul.list-tweets {
+
+
+p small {
+    font-size: 13px;
 }
 
-ul.list-tweets li.list-item-tweet {
-    list-style: none;
+div.tweets-loading {
+    background: url('/media/img/ajax-loader.gif') no-repeat 3px center;
+    height: 50px;
 }

@@ -23,7 +23,7 @@ $(document).ready(function() {
                 }
             }
         }
-      , singleTweetF = tweetTemplateElem.compile(singleTweetDirective)
+      , renderSingleTweet = tweetTemplateElem.compile(singleTweetDirective)
       , View = Backbone.View.extend({
 
             templateElem: $('#sectionsDiv'),
@@ -43,7 +43,7 @@ $(document).ready(function() {
                                 'ul@id+': 'coll.attributes.0', 
 
                                 'ul': function(ctx) {
-                                    return singleTweetF({tweets: ctx.item.attributes[1]})
+                                    return renderSingleTweet({tweets: ctx.item.attributes[1]})
                                 },
 
                                 '@class+': function(arg) {
@@ -67,26 +67,35 @@ $(document).ready(function() {
             return
         }
 
+        if (typeof data.data === 'undefined' ||
+            data.data === null ||
+            data.data.length === 0) {
+            return
+        }
+
         if (isLoaded) {
 
-            var tweets_data = data.data
-
-            _(tweets_data).each(function(tweets) {
+            _(data.data).each(function(tweets) {
                 var type = tweets[0]
                   , messages = tweets[1]
                   , section
 
                 section = $('#' + 'type_' + type)
-                section.prepend(singleTweetF({tweets: messages}))
+                section.prepend(renderSingleTweet({tweets: messages}))
             })
 
             return
         }
 
-        isLoaded = true;
-        window.view.models = new Collection(data.data);
-        window.view.render();
-        $('#sectionsPlaceholder').replaceWith(window.view.el);
+        isLoaded = true
+
+        window.view.models = new Collection(data.data)
+        window.view.render()
+
+        $(window.view.el).hide()
+        $('#sectionsPlaceholder').fadeOut('slow')
+        $('#sectionsPlaceholder').replaceWith(window.view.el)
+        $(window.view.el).fadeIn('slow')
     }
 
     $(document).ready(

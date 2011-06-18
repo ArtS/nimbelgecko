@@ -59,7 +59,7 @@ function getLatestTweetsFromTwitter(options) {
     function _isEndReached(err, tweets) {
 
         if (err) {
-            options.next(err)
+            options.next(err, results)
             return
         }
 
@@ -90,7 +90,9 @@ function getLatestTweetsFromTwitter(options) {
             oauth_token: options.user.oauth_access_token,
             oauth_token_secret: options.user.oauth_access_token_secret,
             next: _isEndReached,
-            params: {count: 200}
+            params: {
+                count: 200
+            }
         }
 
         if (minId !== null) {

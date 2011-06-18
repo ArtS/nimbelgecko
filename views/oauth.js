@@ -7,6 +7,8 @@ var URL = require('url')
 
 exports.callback = function(req, res, next) {
 
+    debugger
+
     var reqUrl = URL.parse(req.url),
         oauth_verifier,
         oauth_credentials = ng.session.getObject(req, OAUTH_CREDENTIALS),
