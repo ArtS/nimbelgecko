@@ -81,7 +81,7 @@ function startServer() {
         },
         {
             target: ng.db.initDatabase,
-            args: [['tweets', 'users']],
+            args: ['tweets', 'users'],
             errorHandler: function(err) {
                 ng.log.error(err, 'Database initialisation failed.');
             }

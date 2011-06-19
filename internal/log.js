@@ -29,10 +29,13 @@ function _inspect(obj) {
 
 
 function getErrorStr(err, message) {
+
     var _err = null,
         _message = null,
-        res = '';
+        str = '';
 
+    // If first parameter is a string, use it as output
+    // Otherwise, check second parameter
     if (typeof err === "string") {
         _message = err;
     } else {
@@ -44,17 +47,25 @@ function getErrorStr(err, message) {
         }
     }
 
-    if(_message !== null) {
-        res += _message;
+    if (_message !== null) {
+        str += _message;
     }
 
-    if(_err !== null) {
-       if(_err.stack !== undefined) {
-           res += (res.length == 0 ? '' : '\n') + _err.stack;
-       }
+    if (_err !== null) {
+        if (typeof _err.name !== 'undefined') {
+            str += (str.length == 0 ? '' : '\n') + 'Exception name: ' + _err.name;
+        }
+
+        if (typeof _err.message !== 'undefined') {
+            str += (str.length == 0 ? '' : '\n') + 'Exception message: ' + _err.message;
+        }
+        
+        if (typeof _err.stack !== 'undefined') {
+            str += (str.length == 0 ? '' : '\n') + 'Stack trace: ' + _err.stack;
+        }
     }
 
-    return res;
+    return str;
 }
 
 

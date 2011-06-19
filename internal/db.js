@@ -359,8 +359,9 @@ function initDatabase(colNames, onDatabaseReady) {
 
     if (!Array.isArray(colNames)) {
         throw {
-            name: 'InvalidArgumentException',
-            message: 'collections parameter must be an array.' 
+              name: 'InvalidArgumentException'
+            , message: 'collections parameter must be an array.'
+            , stack: new Error().stack
         }
     }
 
