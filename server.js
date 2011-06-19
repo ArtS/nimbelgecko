@@ -7,13 +7,12 @@ require.paths.unshift('./internal');
 require('extensions');
 
 
-var util = require('util')
-  , connect = require('connect')
+var connect = require('connect')
   , ng = require('ng')
   , urls = require('urls').urls
-  , io = require('socket.io')
   , socketIO = require('socket.io-connect').socketIO
   , server = null
+  , runChain = require('node-chain').runChain
 
 
 function bindUrls(app, url) {
@@ -71,122 +70,48 @@ function routes(app) {
     }
 }
 
-function onSocketReady(client, req, res) {
-
-    var user = ng.session.getLoggedInUser(req),
-        sinceId = null,
-        intervalId = null
-
-    function sendSocketError(client, err) {
-        client.send({'error': err})
-    }
-
-    function sendSocketData(client, data) {
-        client.send({'data': data})
-    }
-
-    function regularCheck() {
-
-        ng.api.getGroupedTweetsFromDB({
-            user: user,
-            sinceId: sinceId,
-            next: function(err, result) {
-                if (err) {
-                    sendSocketError(client, err)
-                    return
-                }
-
-                if (result.tweets.length === 0) {
-                    return
-                }
-
-                sinceId = result.sinceId
-                sendSocketData(client, result.tweets)
-            }
-        })
-    }
-
-    client.on('message',
-        function(message) {
-            //client.send({data: 'wtf!'});
-        }
-    )
-
-    client.on('disconnect',
-        function() {
-
-            var id = user ? user.user_id : ''
-            console.log(id + ' disconnected');
-
-            if (intervalId !== null) {
-                clearTimeout(intervalId)
-            }
-        }
-    )
-
-    ng.api.getGroupedTweetsFromDB({
-        user: user,
-        next: function(err, result) {
-
-            if (err) {
-                sendSocketError(client, err)
-                return
-            }
-            
-            sinceId = result.sinceId
-            sendSocketData(client, result.tweets)
-
-            intervalId = setInterval(regularCheck, 3000)
-        }
-    })
-}
-
 
 function startServer() {
-
-    ng.conf.initConfig(
-
-        function(err) {
-
-            if(err) {
-                ng.log.error(err, 'Config initialisation failed.');
-                return;
+    runChain([
+        {
+            target: ng.conf.initConfig,
+            errorHandler: function(err) {
+                ng.log.error(err, 'Config initialisation failed.')
             }
+        },
+        {
+            target: ng.db.initDatabase,
+            args: [['tweets', 'users']],
+            errorHandler: function(err) {
+                ng.log.error(err, 'Database initialisation failed.');
+            }
+        },
+        {
+            target: function() {
 
-            ng.db.initDatabase(['tweets', 'users'],
+                // TODO: create separate instance for static files?
+                server = connect.createServer(
+                    socketIO(function() { return server; }, ng.clientSocket.onSocketReady),
+                    connect.bodyParser(),
+                    connect.cookieParser(),
+                    connect.session(
+                        {
+                            store: ng.db.getMongoStore(),
+                            secret: 'blah',
+                            cookieSession: {
+                                maxAge: 604800000
+                            }
+                        }),
+                    connect.router(routes),
+                    connect.static('./static')
+                )
 
-                function(err) {
+                ng.log.log('Starting HTTP Server: ' + ng.conf.server_ip + ':' + ng.conf.server_port)
 
-                    if(err) {
-                        ng.log.error(err, 'Database initialisation failed.');
-                        return;
-                    }
-
-                    // TODO: create separate instance for static files?
-                    
-                    server = connect.createServer(
-                        socketIO(function() { return server; }, onSocketReady),
-                        connect.bodyParser(),
-                        connect.cookieParser(),
-                        connect.session({
-                                            store: ng.db.getMongoStore(),
-                                            secret: 'blah',
-                                            cookieSession: {
-                                                maxAge: 604800000
-                                            }
-                                        }),
-                        connect.router(routes),
-                        connect.static('./static')
-                    )
-
-                    ng.log.log('Starting HTTP Server: ' + ng.conf.server_ip + ':' + ng.conf.server_port)
-                    console.log()
-                    server.listen(ng.conf.server_port, ng.conf.server_ip);
-
-                }
-            );
+                server.listen(ng.conf.server_port, ng.conf.server_ip);
+            }
         }
-    );
+    ])
 }
 
 

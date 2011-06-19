@@ -27,3 +27,5 @@ exports.models = {
 exports.api = require('api')
 
 exports.utils = require('utils')
+
+exports.clientSocket = require('clientSocket')
