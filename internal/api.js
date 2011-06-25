@@ -106,5 +106,59 @@ function getLatestTweetsFromTwitter(options) {
 }
 
 
+function registerNewUser(params) {
+
+    ng.utils.checkRequiredOptions(
+        params,
+        ['user_id', 
+            'screen_name', 
+            'oauth_access_token', 
+            'oauth_access_token_secret',
+            'next']
+    )
+
+    var user = new ng.models.User(
+        {
+                user_id: params.user_id
+            , screen_name: params.screen_name
+            , oauth_access_token: params.oauth_access_token
+            , oauth_access_token_secret: params.oauth_access_token_secret
+        }
+    )
+
+    ng.db.saveUser({
+        user: user,
+        next: function(err) {
+
+            if(err) {
+                params.next(err)
+                return
+            }
+
+            ng.api.getLatestTweetsFromTwitter({
+                user: user,
+                next: function(err, tweets) {
+                    if (err) {
+                        //TODO: fix 'Error: socket hang up' issue
+                        debugger
+                        return
+                    }
+
+                    _(tweets).each(function(tweet) {
+                        ng.db.saveStreamItem({ 
+                            for_user: user.user_id,
+                            message: tweet
+                        })
+                    })
+                }
+            })
+
+        params.next(null, user)
+
+        }
+    })
+}
+
 exports.getGroupedTweetsFromDB = getGroupedTweetsFromDB
 exports.getLatestTweetsFromTwitter = getLatestTweetsFromTwitter
+exports.registerNewUser = registerNewUser

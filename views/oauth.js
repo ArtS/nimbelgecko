@@ -1,13 +1,11 @@
 var URL = require('url')
-  , util = require('util')
   , qs = require('querystring')
   , ng = require('ng')
   , _ = require('underscore')
   , OAUTH_CREDENTIALS = 'oAuthCredentials'
 
-exports.callback = function(req, res, next) {
 
-    debugger
+exports.callback = function(req, res, next) {
 
     var reqUrl = URL.parse(req.url),
         oauth_verifier,
@@ -17,8 +15,10 @@ exports.callback = function(req, res, next) {
     if(oauth_credentials === undefined ||
        oauth_credentials.oauth_token === undefined ||
        oauth_credentials.oauth_token_secret === undefined) {
+
         ng.http.error(req, res, err)
         return
+
     }
     
     oauth_verifier = qs.parse(reqUrl.query).oauth_verifier
@@ -41,49 +41,6 @@ exports.callback = function(req, res, next) {
                 ng.http.redirect(res, '/home')
             }
 
-            function createNewUser() {
-
-                var user = new ng.models.User(
-                    {
-                        user_id: oauth_data.user_id,
-                        screen_name: oauth_data.screen_name,
-                        oauth_access_token: oauth_access_token,
-                        oauth_access_token_secret: oauth_access_token_secret
-                    }
-                )
-                
-                ng.db.saveUser({
-                    user: user,
-                    next: function(err) {
-
-                        if(err) {
-                            ng.http.error(req, res, err, 'Error saving user details')
-                            return
-                        }
-
-                        ng.api.getLatestTweetsFromTwitter({
-                            user: user,
-                            next: function(err, tweets) {
-                                if (err) {
-                                    //TODO: fix 'Error: socket hang up' issue
-                                    debugger
-                                    return
-                                }
-
-                                _(tweets).each(function(tweet) {
-                                    ng.db.saveStreamItem({ 
-                                        for_user: user.user_id,
-                                        message: tweet
-                                    })
-                                })
-                            }
-                        })
-
-                        storeUserToSessionAndGoHome(user)
-                    }
-                })
-            }
-
             ng.db.getUserById({
                 userId: oauth_data.user_id,
                 next: function(err, user) {
@@ -93,7 +50,24 @@ exports.callback = function(req, res, next) {
                     }
 
                     if (user === null || typeof user === "undefined") {
-                        createNewUser()
+
+                        ng.api.registerNewUser({
+                                  user_id: oauth_data.user_id
+                                , screen_name: oauth_data.screen_name 
+                                , oauth_access_token: oauth_access_token
+                                , oauth_access_token_secret: oauth_access_token_secret
+                                , next: function(err, user) {
+
+                                    if(err) {
+                                        ng.http.error(req, res, err, 'Error saving user details')
+                                        return
+                                    }
+
+                                    storeUserToSessionAndGoHome(user)
+
+                                }
+                        })
+
                     } else {
                         storeUserToSessionAndGoHome(user)
                     }

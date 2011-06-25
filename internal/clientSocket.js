@@ -1,5 +1,6 @@
 var ng = require('ng')
 
+
 function onSocketReady(client, req, res) {
 
     var user = ng.session.getLoggedInUser(req)

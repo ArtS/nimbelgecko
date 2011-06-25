@@ -1,10 +1,7 @@
 #!/usr/bin/env node
 
-require.paths.unshift('.')
-require.paths.unshift('./internal');
 
-// Language extensions
-require('extensions');
+require('./fix-paths')
 
 
 var connect = require('connect')
