@@ -5,9 +5,12 @@ var _ = require('underscore')
   , mongoStore = require('connect-mongodb')
   , log = require('log')
   , models = require('models')
+
   , USERS_COLLECTION = 'users'
   , TWEETS_COLLECTION = 'tweets'
   , OTHER_COLLECTION = 'other'
+  , NOTIF_COLLECTION = 'notifications'
+
   , collections = {}
 
 
@@ -73,12 +76,19 @@ function getAllUserIds(callback) {
 
     users.find(
         function(err, cursor) {
+            if (err) {
+                ng.log.error(err, 'Error while getting all user IDs')
+                callback(err, null)
+                return
+            }
+
             cursor.toArray(
                 function(err, arr) {
                     var res = []
 
                     if (err) {
-                        callback(err)
+                        ng.log.error(err, 'Error converting to array for getAllUserIds.')
+                        callback(err, null)
                         return
                     }
                     
@@ -169,17 +179,21 @@ function getRecentTweets(options) {
         function(err, cursor) {
 
             if(err) {
+                ng.log.error(err, 'Error getting recent tweets from database.')
                 options.next(err, null)
                 return
             }
 
             cursor.toArray(
                 function(err, arr) {
+
                     if(err) {
+                        ng.log.error(err, 'Error while converting cursor to array for getRecentTweets')
                         options.next(err, null)
                         return
                     }
-				options.next(null, arr)
+
+                    options.next(null, arr)
                 }
             )
         }
@@ -224,6 +238,7 @@ function saveTweet(options) {
         function(err, cursor) {
 
             if(err) {
+                ng.log.error(err, 'Error looking up tweet with ID ' + tweet.id_str)
                 next(err)
                 return
             }
@@ -231,6 +246,11 @@ function saveTweet(options) {
             cursor.toArray(
 
                 function(err, arr) {
+
+                    if (err) {
+                        ng.log.error(err, 'Error converting cursor to array for tweet with ID ' + tweet.id_str)
+                        return
+                    }
 
                     if(arr.length != 0) {
                         return
@@ -303,17 +323,6 @@ function saveStreamItem(item) {
 }
 
 
-function getUserTokenSecret(user_id) {
-    var users_col = collections[USERS_COLLECTION]
-
-    users_col.find({user_id: user_id}, {},
-        function (err, cursor) {
-            
-        }
-    )
-}
-
-
 function getLastTweetId(user_id, callback) {
 
     var col = collections[TWEETS_COLLECTION]
@@ -353,6 +362,56 @@ function getLastTweetId(user_id, callback) {
 
 }
 
+
+function storeNotification(options) {
+
+    ng.utils.checkRequiredOptions(options, ['notification'])
+
+    options.notification.unread = true
+
+    collections[NOTIF_COLLECTION].insert(options.notification,
+        function(err, doc) {
+            if (err) {
+                ng.log.error(err, 'Error saving notification')
+            }
+
+            if (options.next) {
+                options.next(err, doc)
+            }
+        }
+    )
+}
+
+
+function getNewNotifications(options) {
+
+    ng.utils.checkRequiredOptions(options, ['next'])
+
+    collections[NOTIF_COLLECTION].find({unread: true}, {},
+        function(err, cursor) {
+            
+            if (err) {
+                ng.log.error(err, 'Error while getting notifications')
+                options.next(err, null)
+                return
+            }
+
+            cursor.toArray(
+                function(err, arr) {
+                    if (err) {
+                        ng.log.error(err, 'Error while converting cursor to array for notificatios')
+                        options.next(err, null)
+                        return
+                    }
+
+                    options.next(null, arr)
+                }
+            )
+        }
+    )
+}
+
+
 function initDatabase(colNames, onDatabaseReady) {
 
     var collectionsCopy
@@ -391,10 +450,6 @@ function initDatabase(colNames, onDatabaseReady) {
             }
         )
     }
-
-    console.log(ng.conf.databaseName)
-    console.log(ng.conf.databaseHost)
-    console.log(ng.conf.databasePort)
 
     db = new mongo.Db(
         ng.conf.databaseName,
@@ -440,3 +495,5 @@ exports.saveUnknown = saveUnknown
 exports.getAllUserIds = getAllUserIds
 exports.saveStreamItem = saveStreamItem
 exports.getLastTweetId = getLastTweetId
+exports.getNewNotifications = getNewNotifications
+exports.storeNotification = storeNotification

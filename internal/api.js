@@ -2,7 +2,7 @@ var ng = require('ng')
   , _ = require('underscore')
 
 
-function getGroupedTweetsFromDB(options) {
+exports.getGroupedTweetsFromDB = function(options) {
 
     ng.utils.checkRequiredOptions(options, ['user', 'next'])
 
@@ -49,7 +49,7 @@ function getGroupedTweetsFromDB(options) {
 }
 
 
-function getLatestTweetsFromTwitter(options) {
+exports.getLatestTweetsFromTwitter = function(options) {
 
     ng.utils.checkRequiredOptions(options, ['user', 'next'])
 
@@ -71,6 +71,7 @@ function getLatestTweetsFromTwitter(options) {
         }
 
         _(tweets).each(function(tweet) { 
+            console.log(tweet.id_str)
             if (tweet.id_str == minId) {
                 return
             }
@@ -78,14 +79,10 @@ function getLatestTweetsFromTwitter(options) {
         })
 
         minId = tweets[tweets.length - 1].id_str
-
-        ng.log.log('Received ' + tweets.length + ' from history')
-        ng.log.log('Oldest id: ' + minId)
-
         _retrieveBunch()
     }
 
-    function _retrieveBunch() {
+    function _retrieveBunch(next) {
         var o = {
             oauth_token: options.user.oauth_access_token,
             oauth_token_secret: options.user.oauth_access_token_secret,
@@ -106,23 +103,25 @@ function getLatestTweetsFromTwitter(options) {
 }
 
 
-function registerNewUser(params) {
+exports.registerNewUser = function(options) {
 
     ng.utils.checkRequiredOptions(
-        params,
-        ['user_id', 
+        options,
+        [
+            'user_id', 
             'screen_name', 
             'oauth_access_token', 
             'oauth_access_token_secret',
-            'next']
+            'next'
+        ]
     )
 
     var user = new ng.models.User(
         {
-                user_id: params.user_id
-            , screen_name: params.screen_name
-            , oauth_access_token: params.oauth_access_token
-            , oauth_access_token_secret: params.oauth_access_token_secret
+              user_id: options.user_id
+            , screen_name: options.screen_name
+            , oauth_access_token: options.oauth_access_token
+            , oauth_access_token_secret: options.oauth_access_token_secret
         }
     )
 
@@ -131,10 +130,13 @@ function registerNewUser(params) {
         next: function(err) {
 
             if(err) {
-                params.next(err)
+                options.next(err)
                 return
             }
 
+            //
+            // Schedule retreiving of existing tweets from DB
+            //
             ng.api.getLatestTweetsFromTwitter({
                 user: user,
                 next: function(err, tweets) {
@@ -153,12 +155,18 @@ function registerNewUser(params) {
                 }
             })
 
-        params.next(null, user)
+            //
+            // Let Receiver process know that there's a new user
+            //
+            ng.db.storeNotification({
+                notification: {
+                    user_id: user.user_id,
+                    event_type: 'registered'
+                }
+            })
+
+            options.next(null, user)
 
         }
     })
 }
-
-exports.getGroupedTweetsFromDB = getGroupedTweetsFromDB
-exports.getLatestTweetsFromTwitter = getLatestTweetsFromTwitter
-exports.registerNewUser = registerNewUser
