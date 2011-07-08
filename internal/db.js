@@ -84,6 +84,7 @@ function getAllUserIds(callback) {
 
             cursor.toArray(
                 function(err, arr) {
+
                     var res = []
 
                     if (err) {
@@ -367,7 +368,7 @@ function storeNotification(options) {
 
     ng.utils.checkRequiredOptions(options, ['notification'])
 
-    options.notification.unread = true
+    options.notification.is_read = false
 
     collections[NOTIF_COLLECTION].insert(options.notification,
         function(err, doc) {
@@ -387,7 +388,7 @@ function getNewNotifications(options) {
 
     ng.utils.checkRequiredOptions(options, ['next'])
 
-    collections[NOTIF_COLLECTION].find({unread: true}, {},
+    collections[NOTIF_COLLECTION].find({is_read: false}, {},
         function(err, cursor) {
             
             if (err) {
@@ -412,9 +413,47 @@ function getNewNotifications(options) {
 }
 
 
-function initDatabase(colNames, onDatabaseReady) {
+function markNotificationsAsRead(options) {
+
+    ng.utils.checkRequiredOptions(options, ['next', 'notifications'])
+
+    var notifs = options.notifications
+      , lastNotif = notifs[notifs.length - 1]
+
+    _(notifs).each(function(doc) {
+
+        doc.is_read = true
+
+        ng.log.log('Marking notification ID ' + doc.id + ' as read')
+
+        collections[NOTIF_COLLECTION].save(doc, 
+
+            function(err) {
+
+                if (err) {
+                    ng.log.error(err, 'Error when marking notification as read')
+                    options.next(err)
+                    return
+                }
+
+                // Last element in the array?
+                if (doc._id === lastNotif._id) {
+                    options.next(null)
+                    return
+                } else {
+                    console.log(doc._id + '!=' + lastNotif._id)
+                }
+            }
+        )
+    })    
+}
+
+
+function initDatabase(onDatabaseReady) {
 
     var collectionsCopy
+      , colNames = ng.conf.collections
+
 
     if (!Array.isArray(colNames)) {
         throw {
@@ -431,7 +470,9 @@ function initDatabase(colNames, onDatabaseReady) {
     // supplied in 'colNames' parameter
     //
     function _initCollections() {
+
         var colName = collectionsCopy.pop(0)
+
         if(colName === undefined) {
             onDatabaseReady(null)
             return
@@ -495,5 +536,9 @@ exports.saveUnknown = saveUnknown
 exports.getAllUserIds = getAllUserIds
 exports.saveStreamItem = saveStreamItem
 exports.getLastTweetId = getLastTweetId
+
+//TODO: move notification APIs into separate module
 exports.getNewNotifications = getNewNotifications
 exports.storeNotification = storeNotification
+exports.markNotificationsAsRead = markNotificationsAsRead
+

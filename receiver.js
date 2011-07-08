@@ -7,6 +7,7 @@ require('./fix-paths')
 var ng = require('ng')
     runChain = require('node-chain').runChain,
     STREAM_CHECK_INTERVAL = 60000
+    EventEmitter = require('events').EventEmitter
 
 //
 // Starts receiving all tweets from twitter in streaming mode
@@ -16,10 +17,22 @@ function startReceivingAllTweets() {
     function startReceivingStream(allUserIds) {
 
         var stream = new ng.twitter.ReceivingStream(allUserIds)
-          , watcher = new ng.watcher.Watcher(STREAM_CHECK_INTERVAL)
+          , rstEvent = new EventEmitter()
+          , timeoutWatcher = new ng.watcher.TimeoutWatcher(STREAM_CHECK_INTERVAL)
+          , notificationtimeoutWatcher = new ng.watcher.NotificationWatcher(STREAM_CHECK_INTERVAL)
 
-        stream.on('stream_ready', function() { watcher.startWatching(stream) } )
-        stream.on('data_arrvied', function() { watcher.keepAlive() } )
+        rstEvent.once('restart', function() {
+            ng.log.log('Somebody (' + arguments + ') requesting a restart')
+            timeoutWatcher.stopWatching()
+            notificationtimeoutWatcher.stopWatching()
+            stream.shutdown()
+        })
+
+        stream.on('stream_ready', function() {
+            timeoutWatcher.startWatching(rstEvent)
+            notificationtimeoutWatcher.startWatching(rstEvent)
+        })
+        stream.on('data_arrvied', function() { timeoutWatcher.keepAlive() } )
         stream.on('shutdown', startReceivingAllTweets)
     }
 
@@ -48,7 +61,6 @@ function startReceiver() {
         },
         {
             target: ng.db.initDatabase,
-            args: [['tweets', 'users', 'other']],
             errorMessage: 'Database initialisation failed.'
         },
         {
