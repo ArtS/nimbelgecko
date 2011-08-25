@@ -7,7 +7,7 @@ require('./fix-paths')
 var connect = require('connect')
   , ng = require('ng')
   , urls = require('urls').urls
-  , socketIO = require('socket.io-connect').socketIO
+  , socketIO = require('socket.io-connect').socketIOconnect
   , server = null
   , runChain = require('node-chain').runChain
 
@@ -78,7 +78,6 @@ function startServer() {
         },
         {
             target: ng.db.initDatabase,
-            args: [['tweets', 'users', 'other', 'notifications']],
             errorHandler: function(err) {
                 ng.log.error(err, 'Database initialisation failed.');
             }

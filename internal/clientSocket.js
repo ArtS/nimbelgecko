@@ -18,6 +18,7 @@ function onSocketReady(client, req, res) {
     }
 
     function sendSocketError(client, err) {
+        ng.log.error('Sending socket error: ' + err)
         client.send({'error': err})
     }
 
@@ -63,9 +64,12 @@ function onSocketReady(client, req, res) {
         }
     )
 
-    if (user === null) {
-        sendSocketError()
+    if (user === null || user === undefined)  {
+        sendSocketError(client, 'unauthorised')
+        return
     }
+
+    console.log(user)
 
     ng.api.getGroupedTweetsFromDB({
         user: user,
