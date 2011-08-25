@@ -23,8 +23,8 @@ exports.getOAuthRequestToken = function(callback) {
 
     var callback_url = {
                             protocol: 'http',
-                            hostname: ng.conf.server_ip,
-                            port: ng.conf.server_port,
+                            hostname: ng.conf.callback_address,
+                            port: ng.conf.callback_port,
                             pathname: ng.conf.oauth_callback_url 
                        }
 
