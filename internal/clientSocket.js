@@ -3,6 +3,7 @@ var ng = require('ng')
 
 function onSocketReady(client, req, res) {
 
+    console.log('session id:', client.sessionId)
     var user = ng.session.getLoggedInUser(req)
       , sinceId = null
       , intervalId = null
@@ -56,10 +57,7 @@ function onSocketReady(client, req, res) {
 
     client.on('disconnect',
         function() {
-
             var id = user ? user.user_id : ''
-            console.log(id + ' disconnected');
-
             stopPolling()
         }
     )
@@ -68,8 +66,6 @@ function onSocketReady(client, req, res) {
         sendSocketError(client, 'unauthorised')
         return
     }
-
-    console.log(user)
 
     ng.api.getGroupedTweetsFromDB({
         user: user,

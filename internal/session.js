@@ -4,7 +4,7 @@ var util = require('util'),
 
 
 function _ensureSessionObject(session) {
-    console.log('ensuring session is created')
+    //console.log('ensuring session is created')
     if (typeof session.ng === "undefined") {
         session.ng = {}
     }
@@ -12,7 +12,7 @@ function _ensureSessionObject(session) {
 
 
 function _saveSession(req) {
-    console.log('Saving session: ', req.session)
+    //console.log('Saving session: ', req.session)
     req.sessionStore.set(req.sessionID, req.session, function() {})
 }
 
@@ -30,7 +30,8 @@ function getObject(req, name) {
     //_ensureSessionObject(req.session)
     //console.log('Session: ')
     //console.dir(req.session)
-    console.log('Getting session: ', req.session)
+    console.log('SessionID: ', req.sessionID)
+    //console.log('Getting session: ', req.session)
     return req.session[name]
 }
 

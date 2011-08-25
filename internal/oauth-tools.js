@@ -22,14 +22,13 @@ function getAuth() {
 exports.getOAuthRequestToken = function(callback) {
 
     var callback_url = {
-                            protocol: 'http',
-                            hostname: ng.conf.callback_address,
-                            port: ng.conf.callback_port,
-                            pathname: ng.conf.oauth_callback_url 
-                       }
+        protocol: 'http',
+        hostname: ng.conf.callback_address,
+        port: ng.conf.callback_port,
+        pathname: ng.conf.oauth_callback_url 
+    }
 
-    getAuth().getOAuthRequestToken({oauth_callback: URL.format(callback_url)},
-                                   callback);
+    getAuth().getOAuthRequestToken({oauth_callback: URL.format(callback_url)}, callback);
 }
 
 

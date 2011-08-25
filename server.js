@@ -21,7 +21,7 @@ function bindUrls(app, url) {
             // If no template defined, leave the rendering up to the view
             if(url.template === undefined) {
 
-                url.view(req, res, next);
+                url.view(req, res, next)
 
             } else {
 
@@ -34,8 +34,8 @@ function bindUrls(app, url) {
                         // In case call to view failed, show error
                         if(err) {
                             ng.http.error(req, res, err, 
-                                          'Error obtaining context for view at ' + url.url);
-                            return;
+                                          'Error obtaining context for view at ' + url.url)
+                            return
                         }
 
                         ng.templates.render(url.template, context,
@@ -43,27 +43,27 @@ function bindUrls(app, url) {
                             function(err, htmlResult) {
                                 if(err) {
                                     ng.http.error(req, res, err,
-                                                  'Error when rendering template ' + url.template);
-                                    return;
+                                                  'Error when rendering template ' + url.template)
+                                    return
                                 }
 
-                                ng.http.writeHtml(res, htmlResult);
+                                ng.http.writeHtml(res, htmlResult)
                             }
-                        );
+                        )
                     }
-                );
+                )
             }
         }
-    );
+    )
 }
 
 
 function routes(app) {
     var i = 0,
-        l = urls.length;
+        l = urls.length
 
-    for(; i < l; i++) {
-        bindUrls(app, urls[i]);
+        for(; i < l; i++) {
+        bindUrls(app, urls[i])
     }
 }
 
@@ -79,32 +79,29 @@ function startServer() {
         {
             target: ng.db.initDatabase,
             errorHandler: function(err) {
-                ng.log.error(err, 'Database initialisation failed.');
+                ng.log.error(err, 'Database initialisation failed.')
             }
         },
         {
             target: function() {
 
-                // TODO: create separate instance for static files?
                 server = connect.createServer(
-                    socketIO(function() { return server; }, ng.clientSocket.onSocketReady),
-                    connect.bodyParser(),
+                    socketIO(function() { return server }, ng.clientSocket.onSocketReady),
                     connect.cookieParser(),
-                    connect.session(
-                        {
-                            store: ng.db.getMongoStore(),
-                            secret: 'blah',
-                            cookieSession: {
-                                maxAge: 604800000
-                            }
-                        }),
+                    connect.session({
+                        //store: ng.db.getMongoStore(),
+                        secret: 'blah',
+                        fingerprint: '',
+                        cookieSession: {maxAge: 604800000}
+                    }),
+                    connect.bodyParser(),
                     connect.router(routes),
                     connect.static('./static')
                 )
 
                 ng.log.log('Starting HTTP Server: ' + ng.conf.server_ip + ':' + ng.conf.server_port)
 
-                server.listen(ng.conf.server_port, ng.conf.server_ip);
+                server.listen(ng.conf.server_port, ng.conf.server_ip)
             }
         }
     ])
