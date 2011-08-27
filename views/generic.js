@@ -2,6 +2,14 @@ var ng = require('ng')
 
 
 exports.root = function(req, res, next) {
+
+    var user = ng.session.getLoggedInUser(req)
+    
+    if (user) {
+        ng.http.redirect(res, ng.conf.HOME_URL)
+        return
+    }
+
     next(null, {})
 }
 

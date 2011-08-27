@@ -36,16 +36,11 @@ function getObject(req, name) {
 
 
 function setLoggedInUser(req, user) {
-    //console.log('setting logged in: ')
-    //console.dir(user)
     storeObject(req, USER_SESSION_ID, user)
 }
 
 
 function getLoggedInUser(req) {
-    var user = getObject(req, USER_SESSION_ID)
-    //console.log('getting logged in: ')
-    //console.dir(user)
     return getObject(req, USER_SESSION_ID)
 }
 
