@@ -36,7 +36,16 @@ exports.getGroupedTweetsFromDB = function(options) {
                     continue
                 }
 
-                result.tweets.push([key, sorted[key]])
+                item = {
+                    key: key, 
+                    tweets: sorted[key]
+                }
+
+                if (key === ng.sorting.CATEGORY_ME) {
+                    item.screen_name = '@' + options.user.screen_name
+                }
+
+                result.tweets.push(item)
             }
 
         }

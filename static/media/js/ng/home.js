@@ -36,13 +36,19 @@ $(document).ready(function() {
 
                             'coll<-collections': {
 
-                                'header div.left h3': 'coll.attributes.0',
-                                'header div.right a.tiny-action@href+': 'coll.attributes.0',
+                                'header div.left h3': function(arg) {
+                                    if (typeof arg.coll.item.attributes.screen_name !== 'undefined') {
+                                        return arg.coll.item.attributes.screen_name
+                                    } else {
+                                        return arg.coll.item.attributes.key
+                                    }
+                                },
+                                'header div.right a.tiny-action@href+': 'coll.attributes.key',
 
-                                'ul@id+': 'coll.attributes.0', 
+                                'ul@id+': 'coll.attributes.key', 
 
                                 'ul': function(ctx) {
-                                    return renderSingleTweet({tweets: ctx.item.attributes[1]})
+                                    return renderSingleTweet({tweets: ctx.item.attributes.tweets})
                                 },
 
                                 '@class+': function(arg) {

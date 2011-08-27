@@ -95,5 +95,6 @@ function sortTweets(tweets, user) {
     return sorted_tweets;
 }
 
-exports.sortTweets = sortTweets;
-exports.CATEGORIES = CATEGORIES;
+exports.sortTweets = sortTweets
+exports.CATEGORIES = CATEGORIES
+exports.CATEGORY_ME = CATEGORY_ME
