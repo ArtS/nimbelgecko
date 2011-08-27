@@ -3,7 +3,6 @@ var ng = require('ng')
 
 function onSocketReady(client, req, res) {
 
-    console.log('session id:', client.sessionId)
     var user = ng.session.getLoggedInUser(req)
       , sinceId = null
       , intervalId = null

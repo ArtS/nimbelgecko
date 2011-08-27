@@ -1,10 +1,9 @@
 $(document).ready(function() {
 
     var isLoaded = false
-      , socket = new io.Socket(null, {port: 8081, rememberTransport: false})
       , TweetModel = Backbone.Model.extend({
                           markAsRead: function() {
-                              this.set({is_read: true});
+                              this.set({is_read: true})
                           }
                       })
 
@@ -52,14 +51,14 @@ $(document).ready(function() {
                             }
                         }
                     }
-                , compiled = $p(this.templateElem).compile(directives);
+                , compiled = $p(this.templateElem).compile(directives)
 
-                $(this.el).html(compiled({collections: this.models.toArray()}));
+                $(this.el).html(compiled({collections: this.models.toArray()}))
             }
         })
-      , ctrl;
+      , ctrl
 
-    window.view = new View();
+    window.view = new View()
 
     function onTweetsLoaded(data) {
         if (data.error) {
@@ -102,48 +101,26 @@ $(document).ready(function() {
 
         function() {
 
+            var socket = new io.Socket(null, {
+                  rememberTransport: false,
+                  transports: [/*'websocket', 'flashsocket',*/ 'htmlfile', 'xhr-multipart', 'xhr-polling']
+                })
+
             socket.on('connect',
                 function() {
-                    console.log(arguments);
-                    //socket.send({data: 'zomg wtf!'});
+                    console.log(arguments)
+                    //socket.send({data: 'zomg wtf!'})
                 }
-            );
+            )
 
             socket.on('message',
                 function(data) {
-                    onTweetsLoaded(data);
-                    console.log(arguments);
+                    onTweetsLoaded(data)
+                    console.log(arguments)
                 }
-            );
+            )
 
-            socket.connect();
-
+            socket.connect()
         }
-    );
-
-    /*
-    Controller = Backbone.Controller.extend({
-        routes: {
-            'home': 'home',
-            'actions/mark-read/:id': 'markRead'
-        },
-
-        home: function() {
-            console.log('home');
-        },
-
-        markRead: function(id) {
-            console.log('Mark read: ' + id);
-        }
-    });
-
-    ctrl = new Controller();
-
-    $(document).ready(
-        function() {
-            Backbone.history.start();
-        }
-    );
-    */
-
-});
+    )
+})

@@ -8,6 +8,7 @@ var connect = require('connect')
   , ng = require('ng')
   , urls = require('urls').urls
   , socketIO = require('socket.io-connect').socketIOconnect
+  , io = require('socket.io')
   , server = null
   , runChain = require('node-chain').runChain
 
@@ -89,7 +90,7 @@ function startServer() {
                     socketIO(function() { return server }, ng.clientSocket.onSocketReady),
                     connect.cookieParser(),
                     connect.session({
-                        //store: ng.db.getMongoStore(),
+                        store: ng.db.getMongoStore(),
                         secret: 'blah',
                         fingerprint: '',
                         cookieSession: {maxAge: 604800000}

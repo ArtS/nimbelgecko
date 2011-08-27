@@ -30,7 +30,6 @@ function getObject(req, name) {
     //_ensureSessionObject(req.session)
     //console.log('Session: ')
     //console.dir(req.session)
-    console.log('SessionID: ', req.sessionID)
     //console.log('Getting session: ', req.session)
     return req.session[name]
 }
