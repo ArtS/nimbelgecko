@@ -93,7 +93,7 @@ function startStreaming(ids_to_follow) {
 
     return oAuthGet({
         url: url, 
-        params: {replies: 'all', with: 'followings', follow: ids_str},
+        params: {/*replies: 'all', */with: 'followings', follow: ids_str},
 
         // This uses nimblegecko credentials from DB,
         // and God forbid you from ever changing those in Twitter
