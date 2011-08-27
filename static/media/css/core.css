@@ -149,11 +149,11 @@ nav ul li {
     margin: 0px 5px 0px 5px;
 }
 
-nav li.post {
+nav li.signout {
     float: right;
 }
 
-nav li a {
+nav li a, nav li a:visited {
     color:white;
     text-decoration: none;
 }

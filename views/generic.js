@@ -24,3 +24,9 @@ exports.error = function(req, res, next) {
 exports.home = function(req, res, next) {
     next(null, {})
 }
+
+
+exports.signout = function(req, res, next) {
+    req.session.destroy()
+    ng.http.redirect(res, '/')
+}

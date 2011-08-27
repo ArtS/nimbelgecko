@@ -108,7 +108,7 @@ $(document).ready(function() {
 
             socket.on('connect',
                 function() {
-                    console.log(arguments)
+                    //console.log(arguments)
                     //socket.send({data: 'zomg wtf!'})
                 }
             )
@@ -116,7 +116,7 @@ $(document).ready(function() {
             socket.on('message',
                 function(data) {
                     onTweetsLoaded(data)
-                    console.log(arguments)
+                    //console.log(arguments)
                 }
             )
 

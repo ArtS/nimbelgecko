@@ -31,7 +31,7 @@ exports.urls = [
         template: 'home.html'
     },
     {
-        url: '/ajax/tweets',
-        view: login_required(ng.views.ajax.tweets)
+        url: '/signout',
+        view: ng.views.generic.signout
     }
 ];
