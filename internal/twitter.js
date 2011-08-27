@@ -1,4 +1,4 @@
-console.log(require('oauth'))
+
 var sys = require('sys'),
     ng = require('ng'),
     oAuth = require('oauth').OAuth,

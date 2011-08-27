@@ -64,14 +64,14 @@ function _updateExistingUser(options) {
 }
 
 
-function saveUnknown(item, callback) {
+exports.saveUnknown = function(item, callback) {
     var col = collections[OTHER_COLLECTION]
     col.insert(item, callback)
 }
 
 
-function getAllUserIds(callback) {
-
+function getAllUsersInternal(callback) {
+    
     var users = collections[USERS_COLLECTION]
 
     users.find(
@@ -92,17 +92,8 @@ function getAllUserIds(callback) {
                         callback(err, null)
                         return
                     }
-                    
-                    res = _(arr).chain()
-                            .select(function(user) { 
-                                return (typeof user.user_id !== 'undefined' &&
-                                        user.user_id !== null)
-                            })
-                            .map(function(user) {
-                                return user.user_id;
-                            }).value()
 
-                    callback(null, res)
+                    callback(null, arr)
                 }
             )
         }
@@ -110,14 +101,44 @@ function getAllUserIds(callback) {
 }
 
 
-function saveUser(options) {
+exports.getAllUserIds = function(callback) {
+
+    getAllUsersInternal(function(err, arr) {
+
+        if (err) {
+            callback(err)
+            return
+        }
+
+        res = _(arr).chain()
+                .select(function(user) { 
+                    return (typeof user.user_id !== 'undefined' &&
+                            user.user_id !== null)
+                })
+                .map(function(user) {
+                    return user.user_id;
+                }).value()
+
+        callback(null, res)
+    })
+}
+
+
+exports.getAllUsers = function(callback) {
+    getAllUsersInternal(function(err, arr) {
+        callback(err, arr)
+    })
+}
+
+
+exports.saveUser = function(options) {
 
     ng.utils.checkRequiredOptions(options, ['user', 'next'])
 
     var users = collections[USERS_COLLECTION]
 
     // Check whether user's already registered
-    getUserById({
+    exports.getUserById({
         userId: options.user.user_id,
         next: function(err, user) {
 
@@ -144,7 +165,7 @@ function saveUser(options) {
 }
 
 
-function getUserById(options) {
+exports.getUserById = function(options) {
     
     ng.utils.checkRequiredOptions(options, ['userId', 'next'])
     
@@ -154,7 +175,7 @@ function getUserById(options) {
 }
 
 
-function getRecentTweets(options) {
+exports.getRecentTweets = function(options) {
     
     ng.utils.checkRequiredOptions(options, ['userId', 'next'])
 
@@ -269,7 +290,7 @@ function saveTweet(options) {
 // Saves either a tweet or an unknown object.
 // Invoked from the stream receiving routine
 //
-function saveStreamItem(item) {
+exports.saveStreamItem = function(item) {
 
     var msg
       , for_user = (typeof item.for_user === 'string' ? 
@@ -311,7 +332,7 @@ function saveStreamItem(item) {
         //
         // Unknown type of message
         //
-        saveUnknown(msg, 
+        exports.saveUnknown(msg, 
             function(err) {
                 if (err) {
                     ng.log.error(err, 'Error while saving an unknown entity.')
@@ -324,7 +345,7 @@ function saveStreamItem(item) {
 }
 
 
-function getLastTweetId(user_id, callback) {
+exports.getLastTweetId = function(user_id, callback) {
 
     var col = collections[TWEETS_COLLECTION]
 
@@ -441,7 +462,7 @@ function markNotificationsAsRead(options) {
                     options.next(null)
                     return
                 } else {
-                    console.log(doc._id + '!=' + lastNotif._id)
+                    //console.log(doc._id + '!=' + lastNotif._id)
                 }
             }
         )
@@ -449,7 +470,7 @@ function markNotificationsAsRead(options) {
 }
 
 
-function initDatabase(onDatabaseReady) {
+exports.initDatabase = function(onDatabaseReady) {
 
     var collectionsCopy
       , colNames = ng.conf.collections
@@ -471,12 +492,13 @@ function initDatabase(onDatabaseReady) {
     //
     function _initCollections() {
 
-        var colName = collectionsCopy.pop(0)
 
-        if(colName === undefined) {
+        if(collectionsCopy.length === 0) {
             onDatabaseReady(null)
             return
         }
+
+        var colName = collectionsCopy.pop(0)
 
         db.collection(
             colName, 
@@ -528,17 +550,8 @@ exports.getMongoStore = function() {
 }
 
 exports.collections = collections
-exports.initDatabase = initDatabase
-exports.saveUser = saveUser
-exports.getUserById = getUserById
-exports.getRecentTweets = getRecentTweets
-exports.saveUnknown = saveUnknown
-exports.getAllUserIds = getAllUserIds
-exports.saveStreamItem = saveStreamItem
-exports.getLastTweetId = getLastTweetId
 
 //TODO: move notification APIs into separate module
 exports.getNewNotifications = getNewNotifications
 exports.storeNotification = storeNotification
 exports.markNotificationsAsRead = markNotificationsAsRead
-

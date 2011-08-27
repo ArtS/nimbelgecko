@@ -71,7 +71,7 @@ exports.getLatestTweetsFromTwitter = function(options) {
         }
 
         _(tweets).each(function(tweet) { 
-            console.log(tweet.id_str)
+            //console.log(tweet.id_str)
             if (tweet.id_str == minId) {
                 return
             }
