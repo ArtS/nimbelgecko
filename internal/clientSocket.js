@@ -1,5 +1,5 @@
 var ng = require('ng')
-
+  , util = require('util')
 
 function onSocketReady(client, session) {
 
@@ -23,17 +23,19 @@ function onSocketReady(client, session) {
     }
 
     function sendSocketData(client, data) {
+        util.log(data.length + ' records found for user ' + user.screen_name)
         client.flags.json = true
         client.send({'data': data})
     }
 
     function regularCheck() {
 
-        console.log('checking DB for user ', user.screen_name)
+        util.log('checking DB for user ', user)
         ng.api.getGroupedTweetsFromDB({
             user: user,
             sinceId: sinceId,
             next: function(err, result) {
+
                 if (err) {
                     sendSocketError(client, err)
                     stopPolling()
@@ -41,6 +43,7 @@ function onSocketReady(client, session) {
                 }
 
                 if (result.tweets.length === 0) {
+                    util.log('Nothing found for user ' + user.screen_name)
                     return
                 }
 
@@ -58,7 +61,7 @@ function onSocketReady(client, session) {
 
     client.on('disconnect',
         function() {
-            console.log('disconnect')
+            util.log('disconnect')
             var id = user ? user.user_id : ''
             stopPolling()
         }
