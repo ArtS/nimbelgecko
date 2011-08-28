@@ -1,5 +1,5 @@
 var ng = require('ng')
-  , util = require('util')
+
 
 function onSocketReady(client, session) {
 
@@ -8,6 +8,7 @@ function onSocketReady(client, session) {
       , intervalId = null
 
     function stopPolling() {
+        ng.log.log('Terminating polling for new messages for user ' + user.screen_name)
         if (intervalId !== null) {
             clearTimeout(intervalId)
         }
@@ -23,14 +24,14 @@ function onSocketReady(client, session) {
     }
 
     function sendSocketData(client, data) {
-        util.log(data.length + ' records found for user ' + user.screen_name)
+        ng.log.log(data.length + ' records found for user ' + user.screen_name)
         client.flags.json = true
         client.send({'data': data})
     }
 
     function regularCheck() {
 
-        util.log('checking DB for user ', user)
+        ng.log.log('checking DB for user ', user)
         ng.api.getGroupedTweetsFromDB({
             user: user,
             sinceId: sinceId,
@@ -43,7 +44,7 @@ function onSocketReady(client, session) {
                 }
 
                 if (result.tweets.length === 0) {
-                    util.log('Nothing found for user ' + user.screen_name)
+                    ng.log.log('Nothing found for user ' + user.screen_name)
                     return
                 }
 
@@ -61,8 +62,8 @@ function onSocketReady(client, session) {
 
     client.on('disconnect',
         function() {
-            util.log('disconnect')
-            var id = user ? user.user_id : ''
+            var id = user ? user.screen_name : 'N/A'
+            ng.log.log('disconnected user ' + id)
             stopPolling()
         }
     )
