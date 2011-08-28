@@ -8,7 +8,7 @@ function onSocketReady(client, session) {
       , intervalId = null
 
     function stopPolling() {
-        ng.log.log('Terminating polling for new messages for user ' + user.screen_name)
+        ng.log.log('Terminating polling for new messages for user @' + user.screen_name)
         if (intervalId !== null) {
             clearTimeout(intervalId)
         }
@@ -62,7 +62,7 @@ function onSocketReady(client, session) {
 
     client.on('disconnect',
         function() {
-            var id = user ? user.screen_name : 'N/A'
+            var id = user ? '@' + user.screen_name : 'N/A'
             ng.log.log('disconnected user ' + id)
             stopPolling()
         }

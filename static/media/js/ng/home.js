@@ -108,25 +108,18 @@ $(document).ready(function() {
         function() {
 
             var socket = io.connect(null, {
-                  rememberTransport: false,
-                  transports: [/*'websocket', 'flashsocket',*/ 'htmlfile', 'xhr-multipart', 'xhr-polling']
+                    rememberTransport: false/*,
+                    transports: ['websocket', 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-polling']*/
                 })
 
-            socket.on('connect',
-                function() {
-                    console.log('connect', arguments)
-                    //socket.send({data: 'zomg wtf!'})
-                }
-            )
+            socket.on('connect', function() {
+            })
 
             socket.on('message',
                 function(data) {
                     onTweetsLoaded(data)
-                    console.log('data', arguments)
                 }
             )
-
-            //socket.connect()
         }
     )
 })
