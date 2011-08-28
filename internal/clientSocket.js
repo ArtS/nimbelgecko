@@ -31,7 +31,7 @@ function onSocketReady(client, session) {
 
     function regularCheck() {
 
-        ng.log.log('checking DB for user ', user)
+        //ng.log.log('Checking DB for user @' + user.screen_name)
         ng.api.getGroupedTweetsFromDB({
             user: user,
             sinceId: sinceId,
@@ -44,7 +44,7 @@ function onSocketReady(client, session) {
                 }
 
                 if (result.tweets.length === 0) {
-                    ng.log.log('Nothing found for user ' + user.screen_name)
+                    //ng.log.log('Nothing found for user @' + user.screen_name)
                     return
                 }
 
@@ -56,7 +56,7 @@ function onSocketReady(client, session) {
 
     client.on('message',
         function(message) {
-            //client.send({data: 'wtf!'});
+            ng.log.log(message)
         }
     )
 

@@ -50,7 +50,8 @@ function tagSingleTweet(tweet, user) {
         regexLink = new RegExp('((?:https?|ftp)://[^\\s]*)', 'gi'),
         isReply = regexReply.test(text),
         isMention = regexMention.test(text),
-        isMe = isReply || isMention,
+        isFromMe = tweet.user.id_str === user.user_id
+        isMe = isReply || isMention || isFromMe,
         isLink = regexLink.test(text),
         isPlainText = !isReply && !isMention && !isLink;
 

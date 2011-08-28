@@ -102,13 +102,35 @@ function startServer() {
                 var sio = io.listen(server, {'log level': 2})
 
                 sio.set('authorization', function(data, accept) {
-                    var cookies = connect.utils.parseCookie(data.headers.cookie)
-                      , client = this
 
-                    ng.db.getMongoStore().get(cookies['connect.sid'], function(err, session) {
-                        ng.clientSocket.onSocketReady(client.sockets, session)
+                    var cookies = connect.utils.parseCookie(data.headers.cookie)
+                      , sessionId = cookies['connect.sid']
+
+                    if (!sessionId) {
+                        accept(null, false)
+                        return
+                    }
+
+                    ng.db.getMongoStore().get(sessionId, function(err, session) {
+
+                        if (err) {
+                            accept(err, false)
+                            return
+                        }
+
+                        if (!session) {
+                            accept(null, false)
+                            return
+                        }
+
+                        //ng.clientSocket.onSocketReady(client.sockets, session)
+                        data.session = session
                         accept(null, true)
                     })
+                })
+
+                sio.sockets.on('connection', function(socket) {
+                    ng.clientSocket.onSocketReady(socket, socket.handshake.session)
                 })
 
                 ng.log.log('Starting HTTP Server: ' + ng.conf.server_ip + ':' + ng.conf.server_port)

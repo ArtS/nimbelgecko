@@ -80,9 +80,9 @@ $(document).ready(function() {
 
         if (isLoaded) {
 
-            _(data.data).each(function(tweets) {
-                var type = tweets[0]
-                  , messages = tweets[1]
+            _(data.data).each(function(data) {
+                var type = data.key
+                  , messages = data.tweets
                   , section
 
                 section = $('#' + 'type_' + type)

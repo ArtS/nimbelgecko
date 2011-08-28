@@ -189,7 +189,7 @@ exports.getRecentTweets = function(options) {
     }
 
     if (typeof options.sinceId !== "undefined") {
-        selectCriteria.id_str = {$gt: options.sinceId}
+        selectCriteria.id = {$gt: options.sinceId.toNumber()}
     }
 
     col.find(

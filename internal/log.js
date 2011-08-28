@@ -84,10 +84,10 @@ function log_data(data) {
     data_file.write(data);
 }
 
-function log(text) {
-    util.log(text);
+function log() {
+    util.log.apply(util, arguments);
     log_file.write('\n');
-    log_file.write(text);
+    log_file.write(Array.prototype.slice.call(arguments, 1));
 }
 
 exports.log = log;
