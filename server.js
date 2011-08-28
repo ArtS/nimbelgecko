@@ -7,7 +7,6 @@ require('./fix-paths')
 var connect = require('connect')
   , ng = require('ng')
   , urls = require('urls').urls
-  , socketIO = require('socket.io-connect').socketIOconnect
   , io = require('socket.io')
   , server = null
   , runChain = require('node-chain').runChain
