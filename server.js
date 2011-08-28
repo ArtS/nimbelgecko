@@ -8,6 +8,7 @@ var connect = require('connect')
   , ng = require('ng')
   , urls = require('urls').urls
   , socketIO = require('socket.io-connect').socketIOconnect
+  , io = require('socket.io')
   , server = null
   , runChain = require('node-chain').runChain
 
@@ -86,7 +87,6 @@ function startServer() {
             target: function() {
 
                 server = connect.createServer(
-                    socketIO(function() { return server }, ng.clientSocket.onSocketReady),
                     connect.cookieParser(),
                     connect.session({
                         store: ng.db.getMongoStore(),
@@ -94,13 +94,25 @@ function startServer() {
                         fingerprint: '',
                         cookieSession: {maxAge: 604800000}
                     }),
+                    //socketIO(function() { return server }, ng.clientSocket.onSocketReady),
                     connect.bodyParser(),
                     connect.router(routes),
                     connect.static('./static')
                 )
 
-                ng.log.log('Starting HTTP Server: ' + ng.conf.server_ip + ':' + ng.conf.server_port)
+                var sio = io.listen(server)
 
+                sio.set('authorization', function(data, accept) {
+                    var cookies = connect.utils.parseCookie(data.headers.cookie)
+                      , client = this
+
+                    ng.db.getMongoStore().get(cookies['connect.sid'], function(err, session) {
+                        ng.clientSocket.onSocketReady(client.sockets, session)
+                        accept(null, true)
+                    })
+                })
+
+                ng.log.log('Starting HTTP Server: ' + ng.conf.server_ip + ':' + ng.conf.server_port)
                 server.listen(ng.conf.server_port, ng.conf.server_ip)
             }
         }

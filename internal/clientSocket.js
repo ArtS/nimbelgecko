@@ -1,9 +1,9 @@
 var ng = require('ng')
 
 
-function onSocketReady(client, req, res) {
+function onSocketReady(client, session) {
 
-    var user = ng.session.getLoggedInUser(req)
+    var user = ng.session.getLoggedInUser({session: session})
       , sinceId = null
       , intervalId = null
 
@@ -23,6 +23,7 @@ function onSocketReady(client, req, res) {
     }
 
     function sendSocketData(client, data) {
+        client.flags.json = true
         client.send({'data': data})
     }
 

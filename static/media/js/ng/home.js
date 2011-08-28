@@ -107,14 +107,14 @@ $(document).ready(function() {
 
         function() {
 
-            var socket = new io.Socket(null, {
+            var socket = io.connect(null, {
                   rememberTransport: false,
                   transports: [/*'websocket', 'flashsocket',*/ 'htmlfile', 'xhr-multipart', 'xhr-polling']
                 })
 
             socket.on('connect',
                 function() {
-                    //console.log(arguments)
+                    console.log('connect', arguments)
                     //socket.send({data: 'zomg wtf!'})
                 }
             )
@@ -122,11 +122,11 @@ $(document).ready(function() {
             socket.on('message',
                 function(data) {
                     onTweetsLoaded(data)
-                    //console.log(arguments)
+                    console.log('data', arguments)
                 }
             )
 
-            socket.connect()
+            //socket.connect()
         }
     )
 })
