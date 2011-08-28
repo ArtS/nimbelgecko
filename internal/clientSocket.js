@@ -29,6 +29,7 @@ function onSocketReady(client, session) {
 
     function regularCheck() {
 
+        console.log('checking DB for user ', user.screen_name)
         ng.api.getGroupedTweetsFromDB({
             user: user,
             sinceId: sinceId,
@@ -57,6 +58,7 @@ function onSocketReady(client, session) {
 
     client.on('disconnect',
         function() {
+            console.log('disconnect')
             var id = user ? user.user_id : ''
             stopPolling()
         }

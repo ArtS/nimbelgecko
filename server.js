@@ -99,7 +99,7 @@ function startServer() {
                     connect.static('./static')
                 )
 
-                var sio = io.listen(server)
+                var sio = io.listen(server, {'log level': 2})
 
                 sio.set('authorization', function(data, accept) {
                     var cookies = connect.utils.parseCookie(data.headers.cookie)
