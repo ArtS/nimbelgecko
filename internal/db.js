@@ -517,7 +517,7 @@ exports.getMongoStore = function() {
 
 exports.getUserTweetsCount = function getUserTweetsCount(opts) {
     ng.utils.checkRequiredOptions(opts, ['user_id', 'next'])
-    collections[TWEETS_COLLECTION].count({user_id: opts.user_id}, opts.next)
+    collections[TWEETS_COLLECTION].count({'user.user_id': opts.user_id.toString()}, opts.next)
 }
 
 exports.collections = collections
