@@ -93,7 +93,6 @@ function startServer() {
                         fingerprint: '',
                         cookieSession: {maxAge: 604800000}
                     }),
-                    //socketIO(function() { return server }, ng.clientSocket.onSocketReady),
                     connect.bodyParser(),
                     connect.router(routes),
                     connect.static('./static')
@@ -123,7 +122,6 @@ function startServer() {
                             return
                         }
 
-                        //ng.clientSocket.onSocketReady(client.sockets, session)
                         data.session = session
                         accept(null, true)
                     })

@@ -2,15 +2,68 @@ var ng = require('ng')
   , _ = require('underscore')
 
 
-exports.getGroupedTweetsFromDB = function(options) {
+exports.handleLogin = function(opts) {
 
-    ng.utils.checkRequiredOptions(options, ['user', 'next'])
+    ng.utils.checkRequiredOptions(opts,
+        [
+            'oauth_access_token',
+            'oauth_access_token_secret', 
+            'oauth_data',
+            'next'
+        ]
+    )
 
-    var opts = {userId: options.user.user_id}
+    ng.db.getUserById({
+        user_id: opts.oauth_data.user_id,
+        next: function(err, user) {
 
-    if (typeof options.sinceId !== 'undefined') {
-        opts.sinceId = options.sinceId
-    }
+            if (err) {
+                callback(err, null)
+            }
+
+            if (user === null || typeof user === "undefined") {
+
+                ng.api.registerNewUser({
+                        user_id: opts.oauth_data.user_id
+                        , screen_name: opts.oauth_data.screen_name 
+                        , oauth_access_token: opts.oauth_access_token
+                        , oauth_access_token_secret: opts.oauth_access_token_secret
+                        , next: function(err, user) {
+                            if(err) {
+                                opts.next(err, null)
+                                return
+                            }
+                            opts.next(null, user)
+                        }
+                })
+            } else {
+                // Check if there's no tweets, re-schedule retrieval of tweets
+                // for this user. Prone to resource exhauston attack by remote
+                // client via repeated login/logout, although should be easy to fix - 
+                // by adding and checking a field in user profile. TODO?
+                ng.db.getUserTweetsCount({
+                    user_id: user.user_id,
+                    next: function(err, count) {
+
+                        if (count !== 0)
+                            return
+                        
+                        ng.log.log('User @' + user.screen_name + 
+                                   ' logged in with 0 tweets, trying to retrieve some from Twitter')
+                        ng.api.getAndSaveLatestTweetsFromTwitter(user)
+                    }
+                })
+
+                opts.next(null, user)
+            }
+        }
+    })
+}
+
+
+exports.getGroupedTweetsFromDB = function(opts) {
+
+    ng.utils.checkRequiredOptions(opts, ['user', 'next'])
 
     function _recentTweetsCallback(err, arr) {
 
@@ -22,16 +75,16 @@ exports.getGroupedTweetsFromDB = function(options) {
             }
 
         if (err) {
-            options.next(err)
+            opts.next(err)
             return
         }
 
         if (arr.length != 0) {
 
             result.sinceId = arr[0].id//_str
-            ng.log.log('New max ID for @' + options.user.screen_name + ' ' + arr[0].id)
+            ng.log.log('New max ID for @' + opts.user.screen_name + ' ' + arr[0].id)
 
-            sorted = ng.sorting.sortTweets(arr, options.user)
+            sorted = ng.sorting.sortTweets(arr, opts.user)
             for (key in sorted) {
                 if (!sorted.hasOwnProperty(key)) {
                     continue
@@ -43,7 +96,7 @@ exports.getGroupedTweetsFromDB = function(options) {
                 }
 
                 if (key === ng.sorting.CATEGORY_ME) {
-                    item.screen_name = '@' + options.user.screen_name
+                    item.screen_name = '@' + opts.user.screen_name
                 }
 
                 result.tweets.push(item)
@@ -51,17 +104,25 @@ exports.getGroupedTweetsFromDB = function(options) {
 
         }
 
-        options.next(null, result)
+        opts.next(null, result)
     }
 
-    opts.next = _recentTweetsCallback
-    ng.db.getRecentTweets(opts)
+    var recentTweetsOpts = {
+        user_id: opts.user.user_id,
+        next: _recentTweetsCallback
+    }
+
+    if (typeof opts.sinceId !== 'undefined') {
+        recentTweetsOpts.sinceId = opts.sinceId
+    }
+
+    ng.db.getRecentTweets(recentTweetsOpts)
 }
 
 
-exports.getLatestTweetsFromTwitter = function(options) {
+exports.getLatestTweetsFromTwitter = function(opts) {
 
-    ng.utils.checkRequiredOptions(options, ['user', 'next'])
+    ng.utils.checkRequiredOptions(opts, ['user', 'next'])
 
     var minId = null
       , results = []
@@ -69,19 +130,18 @@ exports.getLatestTweetsFromTwitter = function(options) {
     function _isEndReached(err, tweets) {
 
         if (err) {
-            options.next(err, results)
+            opts.next(err, results)
             return
         }
 
         if (tweets.length === 0 ||
             tweets[tweets.length - 1].id_str == minId) {
-            ng.log.log('No more tweets to receive, returning.')
-            options.next(null, results)
+            ng.log.log('No more tweets to receive for user @' + opts.user.screen_name + ', returning.')
+            opts.next(null, results)
             return
         }
 
         _(tweets).each(function(tweet) { 
-            //console.log(tweet.id_str)
             if (tweet.id_str == minId) {
                 return
             }
@@ -94,8 +154,8 @@ exports.getLatestTweetsFromTwitter = function(options) {
 
     function _retrieveBunch(next) {
         var o = {
-            oauth_token: options.user.oauth_access_token,
-            oauth_token_secret: options.user.oauth_access_token_secret,
+            oauth_token: opts.user.oauth_access_token,
+            oauth_token_secret: opts.user.oauth_access_token_secret,
             next: _isEndReached,
             params: {
                 count: 200
@@ -113,10 +173,34 @@ exports.getLatestTweetsFromTwitter = function(options) {
 }
 
 
-exports.registerNewUser = function(options) {
+exports.getAndSaveLatestTweetsFromTwitter = function(user) {
+
+    ng.api.getLatestTweetsFromTwitter({
+        user: user,
+        next: function(err, tweets) {
+            if (err) {
+                //TODO: not sure whether this still being triggered,
+                // leaving it for now
+                debugger
+                ng.log.error(err, 'Not sure what that is')
+                return
+            }
+
+            _(tweets).each(function(tweet) {
+                ng.db.saveStreamItem({ 
+                    for_user: user.user_id,
+                    message: tweet
+                })
+            })
+        }
+    })
+}
+
+
+exports.registerNewUser = function(opts) {
 
     ng.utils.checkRequiredOptions(
-        options,
+        opts,
         [
             'user_id', 
             'screen_name', 
@@ -128,45 +212,25 @@ exports.registerNewUser = function(options) {
 
     var user = new ng.models.User(
         {
-              user_id: options.user_id
-            , screen_name: options.screen_name
-            , oauth_access_token: options.oauth_access_token
-            , oauth_access_token_secret: options.oauth_access_token_secret
+              user_id: opts.user_id
+            , screen_name: opts.screen_name
+            , oauth_access_token: opts.oauth_access_token
+            , oauth_access_token_secret: opts.oauth_access_token_secret
         }
     )
 
     ng.db.saveUser({
         user: user,
-        next: function(err) {
+        next: function(err, user) {
 
             if(err) {
-                options.next(err)
+                opts.next(err)
                 return
             }
 
             //
-            // Schedule retreiving of existing tweets from DB
-            //
-            ng.api.getLatestTweetsFromTwitter({
-                user: user,
-                next: function(err, tweets) {
-                    if (err) {
-                        //TODO: fix 'Error: socket hang up' issue
-                        debugger
-                        return
-                    }
-
-                    _(tweets).each(function(tweet) {
-                        ng.db.saveStreamItem({ 
-                            for_user: user.user_id,
-                            message: tweet
-                        })
-                    })
-                }
-            })
-
-            //
             // Let Receiver process know that there's a new user
+            // and it needs to restart ASAP
             //
             ng.db.storeNotification({
                 notification: {
@@ -175,8 +239,9 @@ exports.registerNewUser = function(options) {
                 }
             })
 
-            options.next(null, user)
+            ng.api.getAndSaveLatestTweetsFromTwitter(user)
 
+            opts.next(null, user)
         }
     })
 }

@@ -10,15 +10,15 @@ exports.callback = function(req, res, next) {
     var reqUrl = URL.parse(req.url),
         oauth_verifier,
         oauth_credentials = ng.session.getObject(req, OAUTH_CREDENTIALS),
-        err = 'Error, no oauth_token / oauth_token_secret in session'
+        errMsg = 'Error, no oauth_token / oauth_token_secret in session'
 
+    // TODO: refactor this to use utils.checkRequiredOptions ? 
     if(oauth_credentials === undefined ||
        oauth_credentials.oauth_token === undefined ||
        oauth_credentials.oauth_token_secret === undefined) {
 
-        ng.http.error(req, res, err)
+        ng.http.error(req, res, errMsg)
         return
-
     }
     
     oauth_verifier = qs.parse(reqUrl.query).oauth_verifier
@@ -32,47 +32,24 @@ exports.callback = function(req, res, next) {
         function(error, oauth_access_token, oauth_access_token_secret, oauth_data) {
 
             if(error) {
-                ng.http.error(req, res, err)
+                ng.http.error(req, res, error)
                 return
             }
 
-            function storeUserToSessionAndGoHome(user) {
-                ng.session.setLoggedInUser(req, user)
-                ng.http.redirect(res, '/home')
-            }
-
-            ng.db.getUserById({
-                userId: oauth_data.user_id,
+            ng.api.handleLogin({
+                oauth_access_token: oauth_access_token, 
+                oauth_access_token_secret: oauth_access_token_secret,
+                oauth_data: oauth_data,
                 next: function(err, user) {
                     if (err) {
                         ng.http.error(req, res, err)
                         return
                     }
-
-                    if (user === null || typeof user === "undefined") {
-
-                        ng.api.registerNewUser({
-                                  user_id: oauth_data.user_id
-                                , screen_name: oauth_data.screen_name 
-                                , oauth_access_token: oauth_access_token
-                                , oauth_access_token_secret: oauth_access_token_secret
-                                , next: function(err, user) {
-
-                                    if(err) {
-                                        ng.http.error(req, res, err, 'Error saving user details')
-                                        return
-                                    }
-
-                                    storeUserToSessionAndGoHome(user)
-
-                                }
-                        })
-
-                    } else {
-                        storeUserToSessionAndGoHome(user)
-                    }
+                    ng.session.setLoggedInUser(req, user)
+                    ng.http.redirect(res, '/home')
                 }
             })
+
         }
     )
 }

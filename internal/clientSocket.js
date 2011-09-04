@@ -24,7 +24,8 @@ function onSocketReady(client, session) {
     }
 
     function sendSocketData(client, data) {
-        ng.log.log(data.length + ' records found for user ' + user.screen_name)
+        ng.log.log('Sending socket data to client; ' 
+                   + data.length + ' records found for user @' + user.screen_name)
         client.flags.json = true
         client.send({'data': data})
     }

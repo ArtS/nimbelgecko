@@ -1,7 +1,7 @@
 var oAuth = require('oauth').OAuth,
     URL = require('url'),
     util = require('util'),
-    ng = require('ng');
+    ng = require('ng')
 
 
 function getAuth() {
@@ -28,17 +28,17 @@ exports.getOAuthRequestToken = function(callback) {
         pathname: ng.conf.oauth_callback_url 
     }
 
-    getAuth().getOAuthRequestToken({oauth_callback: URL.format(callback_url)}, callback);
+    getAuth().getOAuthRequestToken({oauth_callback: URL.format(callback_url)}, callback)
 }
 
 
 exports.getOAuthAccessToken = function(oauth_token, oauth_token_secret, oauth_verifier, callback) {
-    getAuth().getOAuthAccessToken(oauth_token, oauth_token_secret, oauth_verifier, callback);
+    getAuth().getOAuthAccessToken(oauth_token, oauth_token_secret, oauth_verifier, callback)
 } 
 
 
 exports.redirectToTwitterAuth = function(res, oauth_token) {
-    var url = URL.parse('http://api.twitter.com/oauth/authenticate');
-    url.query = { oauth_token: oauth_token };
-    ng.http.redirect(res, URL.format(url));
+    var url = URL.parse('http://api.twitter.com/oauth/authenticate')
+    url.query = { oauth_token: oauth_token }
+    ng.http.redirect(res, URL.format(url))
 }

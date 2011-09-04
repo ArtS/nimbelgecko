@@ -14,56 +14,6 @@ var _ = require('underscore')
   , collections = {}
 
 
-function _insertNewUser(options) {
-
-    ng.utils.checkRequiredOptions(options, ['user', 'next'])
-
-    var users = collections[USERS_COLLECTION]
-
-    users.insert(
-        new models.User(
-            {
-                user_id: options.user.user_id,
-                screen_name: options.user.screen_name,
-                oauth_access_token: options.user.oauth_access_token,
-                oauth_access_token_secret: options.user.oauth_access_token_secret
-            }
-        ),
-        function(err, doc) {
-            if(err) {
-                return options.next(err)
-            }
-
-            return options.next(null)
-        }
-    )
-}
-
-function _updateExistingUser(options) {
-    
-    ng.utils.checkRequiredOptions(options, ['user', 'existingUser', 'next'])
-
-    var users = collections[USERS_COLLECTION]
-
-    // TODO: refactor into for-in loop?
-    options.existingUser.screen_name = options.user.screen_name
-    options.existingUser.oauth_access_token = options.user.oauth_access_token
-    options.existingUser.oauth_access_token_secret = options.user.oauth_access_token_secret
-    
-    users.save(
-        options.existingUser, 
-        function(err, docs) {
-            if(err) {
-                options.next(err)
-                return
-            }
-
-            options.next(null)
-        }
-    )
-}
-
-
 exports.saveUnknown = function(item, callback) {
     var col = collections[OTHER_COLLECTION]
     col.insert(item, callback)
@@ -112,8 +62,7 @@ exports.getAllUserIds = function(callback) {
 
         res = _(arr).chain()
                 .select(function(user) { 
-                    return (typeof user.user_id !== 'undefined' &&
-                            user.user_id !== null)
+                    return !!user.user_id
                 })
                 .map(function(user) {
                     return user.user_id;
@@ -131,65 +80,110 @@ exports.getAllUsers = function(callback) {
 }
 
 
-exports.saveUser = function(options) {
+function _insertNewUser(opts) {
 
-    ng.utils.checkRequiredOptions(options, ['user', 'next'])
+    ng.utils.checkRequiredOptions(opts, ['user', 'next'])
 
     var users = collections[USERS_COLLECTION]
 
-    // Check whether user's already registered
+    users.insert(
+        new models.User(
+            {
+                user_id: opts.user.user_id,
+                screen_name: opts.user.screen_name,
+                oauth_access_token: opts.user.oauth_access_token,
+                oauth_access_token_secret: opts.user.oauth_access_token_secret
+            }
+        ),
+        function(err, doc) {
+            if(err) {
+                return opts.next(err, null)
+            }
+
+            return opts.next(null, doc)
+        }
+    )
+}
+
+
+function _updateExistingUser(opts) {
+
+    ng.utils.checkRequiredOptions(opts, ['user', 'existingUser', 'next'])
+    var users = collections[USERS_COLLECTION]
+
+    // TODO: refactor into for-in loop?
+    opts.existingUser.screen_name = opts.user.screen_name
+    opts.existingUser.oauth_access_token = opts.user.oauth_access_token
+    opts.existingUser.oauth_access_token_secret = opts.user.oauth_access_token_secret
+    
+    users.save(
+        opts.existingUser, 
+        function(err, docs) {
+            if(err) {
+                opts.next(err, null)
+                return
+            }
+            opts.next(null, opts.existingUser)
+        }
+    )
+}
+
+
+exports.saveUser = function(opts) {
+
+    ng.utils.checkRequiredOptions(opts, ['user', 'next'])
+
+    var users = collections[USERS_COLLECTION]
+
+    // Check if user is already registered
     exports.getUserById({
-        userId: options.user.user_id,
+        user_id: opts.user.user_id,
         next: function(err, user) {
 
             if (err) {
-                options.next(err)
+                opts.next(err)
                 return                
             }
 
-            if (typeof user === 'undefined' || user === null) {
-
-                _insertNewUser(options)
-
+            if (opts) {
+                _insertNewUser(opts)
             } else {
-
                 _updateExistingUser({
-                    user: options.user,
+                    user: opts.user,
                     existingUser: user, 
-                    next: options.next
+                    next: opts.next
                 })
-
             }
         }
     })
 }
 
 
-exports.getUserById = function(options) {
+exports.getUserById = function(opts) {
     
-    ng.utils.checkRequiredOptions(options, ['userId', 'next'])
+    ng.utils.checkRequiredOptions(opts, ['user_id', 'next'])
     
     var users = collections[USERS_COLLECTION]
 
-    users.findOne({user_id: options.userId}, options.next)
+    users.findOne({user_id: opts.user_id}, opts.next)
 }
 
 
-exports.getRecentTweets = function(options) {
+exports.getRecentTweets = function(opts) {
     
-    ng.utils.checkRequiredOptions(options, ['userId', 'next'])
+    ng.utils.checkRequiredOptions(opts, ['user_id', 'next'])
 
     var col = collections[TWEETS_COLLECTION]
       , selectCriteria = {}
 
-    if (typeof options.userId !== 'string') {
-        selectCriteria.for_user = options.userId.toString()
+    if (typeof opts.user_id !== 'string') {
+        selectCriteria.for_user = opts.user_id.toString()
     } else {
-        selectCriteria.for_user = options.userId
+        selectCriteria.for_user = opts.user_id
     }
 
-    if (typeof options.sinceId !== "undefined") {
-        selectCriteria.id = {$gt: options.sinceId.toNumber()}
+    if (opts.sinceId) {
+        selectCriteria.id = {$gt: opts.sinceId.toNumber()}
     }
 
     col.find(
@@ -202,7 +196,7 @@ exports.getRecentTweets = function(options) {
 
             if(err) {
                 ng.log.error(err, 'Error getting recent tweets from database.')
-                options.next(err, null)
+                opts.next(err, null)
                 return
             }
 
@@ -211,11 +205,11 @@ exports.getRecentTweets = function(options) {
 
                     if(err) {
                         ng.log.error(err, 'Error while converting cursor to array for getRecentTweets')
-                        options.next(err, null)
+                        opts.next(err, null)
                         return
                     }
 
-                    options.next(null, arr)
+                    opts.next(null, arr)
                 }
             )
         }
@@ -225,6 +219,8 @@ exports.getRecentTweets = function(options) {
 
 function _isFieldPresent(elem, field_name) {
 
+    // Not using coercion here, since -0, +0, NaN, false and empty strings
+    // will fail the test
     if (elem[field_name] === undefined ||
         elem[field_name] === null) {
 
@@ -244,45 +240,15 @@ function _saveTweetErrorHandler(err) {
 }
 
 
-function saveTweet(options) {
+function saveTweet(opts) {
 
-    ng.utils.checkRequiredOptions(options, ['tweet'])
-    
+    ng.utils.checkRequiredOptions(opts, ['tweet'])
 
     var col = collections[TWEETS_COLLECTION]
-      , tweet = options.tweet
-      , next = options.next || _saveTweetErrorHandler
+      , tweet = opts.tweet
+      , next = opts.next || _saveTweetErrorHandler
 
-    col.find(
-
-        { id_str: tweet.id_str }, {},
-
-        function(err, cursor) {
-
-            if(err) {
-                ng.log.error(err, 'Error looking up tweet with ID ' + tweet.id_str)
-                next(err)
-                return
-            }
-
-            cursor.toArray(
-
-                function(err, arr) {
-
-                    if (err) {
-                        ng.log.error(err, 'Error converting cursor to array for tweet with ID ' + tweet.id_str)
-                        return
-                    }
-
-                    if(arr.length != 0) {
-                        return
-                    }
-
-                    col.insert(tweet, next)
-                }
-            ) 
-        }
-    )
+    col.insert(tweet, next)
 }
 
 
@@ -310,8 +276,7 @@ exports.saveStreamItem = function(item) {
     msg = item.message
     msg.for_user = for_user
 
-    if(msg.user !== undefined &&
-       msg.text !== undefined) {
+    if(msg.user && msg.text) {
 
         msg.is_read = false
 
@@ -385,36 +350,36 @@ exports.getLastTweetId = function(user_id, callback) {
 }
 
 
-function storeNotification(options) {
+exports.storeNotification = function storeNotification(opts) {
 
-    ng.utils.checkRequiredOptions(options, ['notification'])
+    ng.utils.checkRequiredOptions(opts, ['notification'])
 
-    options.notification.is_read = false
+    opts.notification.is_read = false
 
-    collections[NOTIF_COLLECTION].insert(options.notification,
+    collections[NOTIF_COLLECTION].insert(opts.notification,
         function(err, doc) {
             if (err) {
                 ng.log.error(err, 'Error saving notification')
             }
 
-            if (options.next) {
-                options.next(err, doc)
+            if (opts.next) {
+                opts.next(err, doc)
             }
         }
     )
 }
 
 
-function getNewNotifications(options) {
+exports.getNewNotifications = function getNewNotifications(opts) {
 
-    ng.utils.checkRequiredOptions(options, ['next'])
+    ng.utils.checkRequiredOptions(opts, ['next'])
 
     collections[NOTIF_COLLECTION].find({is_read: false}, {},
         function(err, cursor) {
             
             if (err) {
                 ng.log.error(err, 'Error while getting notifications')
-                options.next(err, null)
+                opts.next(err, null)
                 return
             }
 
@@ -422,11 +387,11 @@ function getNewNotifications(options) {
                 function(err, arr) {
                     if (err) {
                         ng.log.error(err, 'Error while converting cursor to array for notificatios')
-                        options.next(err, null)
+                        opts.next(err, null)
                         return
                     }
 
-                    options.next(null, arr)
+                    opts.next(null, arr)
                 }
             )
         }
@@ -434,11 +399,11 @@ function getNewNotifications(options) {
 }
 
 
-function markNotificationsAsRead(options) {
+exports.markNotificationsAsRead = function markNotificationsAsRead(opts) {
 
-    ng.utils.checkRequiredOptions(options, ['next', 'notifications'])
+    ng.utils.checkRequiredOptions(opts, ['next', 'notifications'])
 
-    var notifs = options.notifications
+    var notifs = opts.notifications
       , lastNotif = notifs[notifs.length - 1]
 
     _(notifs).each(function(doc) {
@@ -453,13 +418,13 @@ function markNotificationsAsRead(options) {
 
                 if (err) {
                     ng.log.error(err, 'Error when marking notification as read')
-                    options.next(err)
+                    opts.next(err)
                     return
                 }
 
                 // Last element in the array?
                 if (doc._id === lastNotif._id) {
-                    options.next(null)
+                    opts.next(null)
                     return
                 } else {
                     //console.log(doc._id + '!=' + lastNotif._id)
@@ -549,9 +514,10 @@ exports.getMongoStore = function() {
     })
 }
 
-exports.collections = collections
 
-//TODO: move notification APIs into separate module
-exports.getNewNotifications = getNewNotifications
-exports.storeNotification = storeNotification
-exports.markNotificationsAsRead = markNotificationsAsRead
+exports.getUserTweetsCount = function getUserTweetsCount(opts) {
+    ng.utils.checkRequiredOptions(opts, ['user_id', 'next'])
+    collections[TWEETS_COLLECTION].count({user_id: opts.user_id}, opts.next)
+}
+
+exports.collections = collections
