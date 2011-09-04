@@ -338,7 +338,7 @@ exports.getLastTweetId = function(user_id, callback) {
                     }
     
                     if (arr !== null && arr.length !== 0) {
-                        id = arr[0].id.toString()
+                        id = arr[0].id_str
                     }
 
                     callback(null, id)
@@ -517,7 +517,7 @@ exports.getMongoStore = function() {
 
 exports.getUserTweetsCount = function getUserTweetsCount(opts) {
     ng.utils.checkRequiredOptions(opts, ['user_id', 'next'])
-    collections[TWEETS_COLLECTION].count({'user.id': opts.user_id.toString()}, opts.next)
+    collections[TWEETS_COLLECTION].count({'user.id_str': opts.user_id.toString()}, opts.next)
 }
 
 exports.collections = collections
