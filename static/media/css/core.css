@@ -66,6 +66,13 @@ body {
 	margin: 0 auto;
 	padding: 5px 25px 0;
     width: 100%;
+    text-align: center;
+}
+
+div.main-container {
+    margin: 0 auto;
+    width: 35em;
+    text-align: left;
 }
 
 
