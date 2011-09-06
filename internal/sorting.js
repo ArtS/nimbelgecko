@@ -11,7 +11,7 @@ var ng = require('ng'),
 
 function formatLinks(text) {
     var r = new RegExp("((?:https?|ftp)://[^\\s]*)", "gi");
-    return text.replace(r, '<a href="$1">$1</a>');
+    return text.replace(r, '<a href="$1" target="_blank">$1</a>');
 }
 
 
