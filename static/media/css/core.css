@@ -66,6 +66,9 @@ body {
 	margin: 0 auto;
 	padding: 5px 25px 0;
     width: 100%;
+}
+
+body.front-page {
     text-align: center;
 }
 
@@ -108,6 +111,7 @@ header h1, header h2, header h3 {
 header h1 {
     font-size: 74px;
     line-height: 86px;
+    margin-top: 0.17em;
 }
 
 header h2 {
