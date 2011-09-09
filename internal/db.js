@@ -80,7 +80,12 @@ exports.getAllUsers = function(callback) {
 }
 
 
-function _insertNewUser(opts) {
+function _updateExistingUser(opts) {
+
+}
+
+
+exports.saveNewUser = function(opts) {
 
     ng.utils.checkRequiredOptions(opts, ['user', 'next'])
 
@@ -105,57 +110,25 @@ function _insertNewUser(opts) {
     )
 }
 
+exports.updateExistingUser = function(opts) {
 
-function _updateExistingUser(opts) {
+    ng.utils.checkRequiredOptions(opts, ['oldUser', 'data', 'next'])
 
-    ng.utils.checkRequiredOptions(opts, ['user', 'existingUser', 'next'])
     var users = collections[USERS_COLLECTION]
 
-    // TODO: refactor into for-in loop?
-    opts.existingUser.screen_name = opts.user.screen_name
-    opts.existingUser.oauth_access_token = opts.user.oauth_access_token
-    opts.existingUser.oauth_access_token_secret = opts.user.oauth_access_token_secret
+    opts.oldUser.screen_name = opts.data.screen_name
+    opts.oldUser.oauth_access_token = opts.data.oauth_access_token
+    opts.oldUser.oauth_access_token_secret = opts.data.oauth_access_token_secret
     
     users.save(
-        opts.existingUser, 
+        opts.oldUser, 
         function(err, docs) {
-            if(err) {
+            if (err)
                 opts.next(err, null)
-                return
-            }
-            opts.next(null, opts.existingUser)
+            else
+                opts.next(null, opts.oldUser)
         }
     )
-}
-
-
-exports.saveUser = function(opts) {
-
-    ng.utils.checkRequiredOptions(opts, ['user', 'next'])
-
-    var users = collections[USERS_COLLECTION]
-
-    // Check if user is already registered
-    exports.getUserById({
-        user_id: opts.user.user_id,
-        next: function(err, user) {
-
-            if (err) {
-                opts.next(err)
-                return                
-            }
-
-            if (opts) {
-                _insertNewUser(opts)
-            } else {
-                _updateExistingUser({
-                    user: opts.user,
-                    existingUser: user, 
-                    next: opts.next
-                })
-            }
-        }
-    })
 }
 
 

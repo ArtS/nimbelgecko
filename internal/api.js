@@ -4,57 +4,33 @@ var ng = require('ng')
 
 exports.handleLogin = function(opts) {
 
-    ng.utils.checkRequiredOptions(opts,
-        [
-            'oauth_access_token',
-            'oauth_access_token_secret', 
-            'oauth_data',
-            'next'
-        ]
-    )
+    ng.utils.checkRequiredOptions(opts, ['oauth_access_token', 'oauth_access_token_secret', 
+                                         'oauth_data','next'])
 
     ng.db.getUserById({
         user_id: opts.oauth_data.user_id,
         next: function(err, user) {
 
-            if (err) {
+            if (err)
                 callback(err, null)
-            }
 
             if (user === null || typeof user === "undefined") {
 
                 ng.api.registerNewUser({
-                        user_id: opts.oauth_data.user_id
-                        , screen_name: opts.oauth_data.screen_name 
-                        , oauth_access_token: opts.oauth_access_token
-                        , oauth_access_token_secret: opts.oauth_access_token_secret
-                        , next: function(err, user) {
-                            if(err) {
-                                opts.next(err, null)
-                                return
-                            }
-                            opts.next(null, user)
-                        }
+                      user_id: opts.oauth_data.user_id
+                    , screen_name: opts.oauth_data.screen_name 
+                    , oauth_access_token: opts.oauth_access_token
+                    , oauth_access_token_secret: opts.oauth_access_token_secret
+                    , next: opts.next
                 })
+
             } else {
-                // Check if there's no tweets, re-schedule retrieval of tweets
-                // for this user. Prone to resource exhauston attack by remote
-                // client via repeated login/logout, although should be easy to fix - 
-                // by adding and checking a field in user profile. TODO?
-                ng.db.getUserTweetsCount({
-                    user_id: user.user_id,
-                    next: function(err, count) {
 
-                        if (count !== 0)
-                            return
-                        
-                        ng.log.log('User @' + user.screen_name + 
-                                   ' logged in with 0 tweets, trying to retrieve some from Twitter')
-                        ng.api.getAndSaveLatestTweetsFromTwitter(user)
-                    }
+                ng.api.updateUserData({
+                    data: opts.oauth_data,
+                    oldUser: user,
+                    next: opts.next
                 })
-
-                opts.next(null, user)
             }
         }
     })
@@ -219,7 +195,7 @@ exports.registerNewUser = function(opts) {
         }
     )
 
-    ng.db.saveUser({
+    ng.db.saveNewUser({
         user: user,
         next: function(err, user) {
 
@@ -244,4 +220,34 @@ exports.registerNewUser = function(opts) {
             opts.next(null, user)
         }
     })
+}
+
+
+exports.updateUserData = function(opts) {
+
+    ng.utils.checkRequiredOptions(opts, ['next', 'data', 'oldUser'])
+
+    // Check if there's no tweets, schedule retrieval of tweets
+    // for this user. Prone to resource exhauston attack by remote
+    // client via repeated login/logout, although should be easy to fix - 
+    // by adding and checking a field in user profile. TODO?
+    ng.db.getUserTweetsCount({
+        user_id: opts.oldUser.user_id,
+        next: function(err, count) {
+
+            if (count !== 0)
+                return
+            
+            ng.log.log('User @' + opts.oldUser.screen_name + 
+                    ' logged in with 0 tweets, trying to retrieve some from Twitter')
+
+            ng.api.getAndSaveLatestTweetsFromTwitter(opts.oldUser)
+        }
+    })
+
+    // Also need to update user profile record in case anything changed
+    // Mostlikely that's going to be only screen_name, I don't think
+    // oauth data changes ever - otherwise we wouldn't be able to log in
+    // in first place.
+    ng.db.updateExistingUser(opts)
 }
