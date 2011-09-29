@@ -88,7 +88,7 @@ function retrieveTweets(options) {
 
 function startStreaming(ids_to_follow) {
 
-    var url = 'http://betastream.twitter.com/2b/site.json',
+    var url = 'https://sitestream.twitter.com/2b/site.json',
         ids_str = ids_to_follow.join(',')
 
     return oAuthGet({
