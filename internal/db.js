@@ -155,7 +155,7 @@ exports.getRecentTweets = function(opts) {
         selectCriteria.for_user = opts.user_id
     }
 
-    if (opts.sinceId) {
+    if (opts.sinceId !== null && typeof opts.sinceId !== 'undefined') {
         console.dir(opts.sinceId)
         selectCriteria.id = {$gt: opts.sinceId.toString()}
     }
