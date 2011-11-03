@@ -62,9 +62,8 @@ exports.getGroupedTweetsFromDB = function(opts) {
 
             sorted = ng.sorting.sortTweets(arr, opts.user)
             for (key in sorted) {
-                if (!sorted.hasOwnProperty(key)) {
+                if (!sorted.hasOwnProperty(key))
                     continue
-                }
 
                 item = {
                     key: key, 
@@ -88,7 +87,7 @@ exports.getGroupedTweetsFromDB = function(opts) {
         next: _recentTweetsCallback
     }
 
-    if (typeof opts.sinceId !== 'undefined') {
+    if (opts.sinceId) {
         recentTweetsOpts.sinceId = opts.sinceId
     }
 

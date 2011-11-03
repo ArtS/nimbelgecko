@@ -24,8 +24,12 @@ function onSocketReady(client, session) {
     }
 
     function sendSocketData(client, data) {
-        ng.log.log('Sending socket data to client; ' 
-                   + data.length + ' records found for user @' + user.screen_name)
+
+        ng.log.log('Sending socket data to client ' + user.screen_name)
+        for (var i=0; i < data.length; i++) {
+            ng.log.log(data[i].key + ': ' + data[i].tweets.length)
+        }
+
         client.flags.json = true
         client.send({'data': data})
     }
@@ -49,7 +53,9 @@ function onSocketReady(client, session) {
                     return
                 }
 
+                ng.log.log('Old sinceId: ' + sinceId)
                 sinceId = result.sinceId
+                ng.log.log('New sinceId: ' + sinceId)
                 sendSocketData(client, result.tweets)
             }
         })
@@ -74,21 +80,7 @@ function onSocketReady(client, session) {
         return
     }
 
-    ng.api.getGroupedTweetsFromDB({
-        user: user,
-        next: function(err, result) {
-
-            if (err) {
-                sendSocketError(client, err)
-                return
-            }
-            
-            sinceId = result.sinceId
-            sendSocketData(client, result.tweets)
-
-            startPolling()
-        }
-    })
+    startPolling()
 }
 
 
