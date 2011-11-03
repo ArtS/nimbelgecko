@@ -156,10 +156,11 @@ exports.getRecentTweets = function(opts) {
     }
 
     if (opts.sinceId) {
-        selectCriteria.id = {$gt: opts.sinceId.toNumber()}
+        selectCriteria.id = {$gt: opts.sinceId.toString()}
     }
 
     console.log('Selecting from DB: ', selectCriteria)
+
     col.find(
         selectCriteria,
         {
