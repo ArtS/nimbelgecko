@@ -149,18 +149,22 @@ exports.getRecentTweets = function(opts) {
     var col = collections[TWEETS_COLLECTION]
       , selectCriteria = {}
 
-    if (typeof opts.user_id !== 'string') {
+    /*if (typeof opts.user_id !== 'string') {
         selectCriteria.for_user = opts.user_id.toString()
-    } else {
+    } else {*/
         selectCriteria.for_user = opts.user_id
-    }
+    //}
 
     if (opts.sinceId !== null && typeof opts.sinceId !== 'undefined') {
-        console.dir(opts.sinceId)
+    console.log('SinceID: ')
+    console.log(opts.sinceId)
+
+    console.log('String sinceId: ' + opts.sinceId.toString())
         selectCriteria.id = {$gt: opts.sinceId}
+    console.log('Select crit: ', selectCriteria)
     }
 
-    console.log('Selecting from DB: ', selectCriteria)
+    //console.log('Selecting from DB: ', selectCriteria)
 
     col.find(
         selectCriteria,
@@ -184,6 +188,7 @@ exports.getRecentTweets = function(opts) {
                         opts.next(err, null)
                         return
                     }
+                    //console.log('Received ' + arr.length + ' tweets')
 
                     opts.next(null, arr)
                 }
@@ -435,7 +440,7 @@ exports.initDatabase = function(onDatabaseReady) {
 
 
         if(collectionsCopy.length === 0) {
-            onDatabaseReady(null)
+            onDatabaseReady(null, db)
             return
         }
 

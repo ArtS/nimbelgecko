@@ -5,17 +5,21 @@ function onSocketReady(client, session) {
 
     var user = ng.session.getLoggedInUser({session: session})
       , sinceId = null
-      , intervalId = null
+      , timeoutId = null
 
-    function stopPolling() {
-        ng.log.log('Terminating polling for new messages for user @' + user.screen_name)
-        if (intervalId !== null) {
-            clearTimeout(intervalId)
+    function getUserId() {
+        return user ? '@' + user.screen_name : 'N/A'
+    }
+
+    function cancelNextCheck() {
+        ng.log.log('Terminating scheduled check for new messages for user @' + getUserId())
+        if (timeoutId !== null) {
+            clearTimeout(timeoutId)
         }
     }
 
-    function startPolling() {
-        intervalId = setInterval(regularCheck, 3000);
+    function scheduleNextCheck() {
+        timeoutId = setTimeout(regularCheck, 3000);
     }
 
     function sendSocketError(client, err) {
@@ -25,7 +29,7 @@ function onSocketReady(client, session) {
 
     function sendSocketData(client, data) {
 
-        ng.log.log('Sending socket data to client ' + user.screen_name)
+        ng.log.log('Sending socket data to client ' + getUserId())
         for (var i=0; i < data.length; i++) {
             ng.log.log(data[i].key + ': ' + data[i].tweets.length)
         }
@@ -36,7 +40,7 @@ function onSocketReady(client, session) {
 
     function regularCheck() {
 
-        //ng.log.log('Checking DB for user @' + user.screen_name)
+        //ng.log.log('Checking DB for user @' + getUserId())
         ng.api.getGroupedTweetsFromDB({
             user: user,
             sinceId: sinceId,
@@ -44,18 +48,19 @@ function onSocketReady(client, session) {
 
                 if (err) {
                     sendSocketError(client, err)
-                    stopPolling()
+                    cancelNextCheck()
                     return
                 }
 
+		scheduleNextCheck()
                 if (result.tweets.length === 0) {
-                    //ng.log.log('Nothing found for user @' + user.screen_name)
+                    //ng.log.log('Nothing found for user @' + getUserId())
                     return
                 }
 
-                ng.log.log('Old sinceId: ' + sinceId)
+                //ng.log.log('Old sinceId: ' + sinceId)
                 sinceId = result.sinceId
-                ng.log.log('New sinceId: ' + sinceId)
+                //ng.log.log('New sinceId: ' + sinceId)
                 sendSocketData(client, result.tweets)
             }
         })
@@ -69,9 +74,8 @@ function onSocketReady(client, session) {
 
     client.on('disconnect',
         function() {
-            var id = user ? '@' + user.screen_name : 'N/A'
-            ng.log.log('disconnected user ' + id)
-            stopPolling()
+            ng.log.log('disconnected user ' + getUserId())
+            cancelNextCheck()
         }
     )
 
@@ -80,7 +84,7 @@ function onSocketReady(client, session) {
         return
     }
 
-    startPolling()
+    scheduleNextCheck()
 }
 
 
