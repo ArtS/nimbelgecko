@@ -156,7 +156,6 @@ exports.getRecentTweets = function(opts) {
     }
 
     if (opts.sinceId !== null && typeof opts.sinceId !== 'undefined') {
-        console.dir(opts.sinceId)
         selectCriteria.id = {$gt: opts.sinceId}
     }
 
@@ -407,7 +406,7 @@ exports.markNotificationsAsRead = function markNotificationsAsRead(opts) {
                 }
             }
         )
-    })    
+    })
 }
 
 
@@ -435,7 +434,7 @@ exports.initDatabase = function(onDatabaseReady) {
 
 
         if(collectionsCopy.length === 0) {
-            onDatabaseReady(null)
+            onDatabaseReady(null, db)
             return
         }
 

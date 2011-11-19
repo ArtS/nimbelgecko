@@ -134,7 +134,9 @@ function startServer() {
                 })
 
                 ng.log.log('Starting HTTP Server: ' + ng.conf.server_ip + ':' + ng.conf.server_port)
-                server.listen(ng.conf.server_port, ng.conf.server_ip)
+                server.listen(ng.conf.server_port, ng.conf.server_ip, function() {
+		   console.log(arguments)
+                })
             }
         }
     ])
