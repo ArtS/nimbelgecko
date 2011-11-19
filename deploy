@@ -3,7 +3,6 @@
 git pull
 
 npm install socket.io
-npm install socket.io-connect
 npm install connect
 npm install mongodb
 npm install connect-mongodb
