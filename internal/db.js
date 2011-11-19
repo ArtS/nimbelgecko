@@ -160,7 +160,7 @@ exports.getRecentTweets = function(opts) {
         selectCriteria.id = {$gt: opts.sinceId}
     }
 
-    console.log('Selecting from DB: ', selectCriteria)
+    //console.log('Selecting from DB: ', selectCriteria)
 
     col.find(
         selectCriteria,
@@ -483,8 +483,11 @@ exports.initDatabase = function(onDatabaseReady) {
 
 exports.getMongoStore = function() {
     return new mongoStore({
-        host: ng.conf.databaseHost,
-        port: ng.conf.databasePort,
+        server_config: new mongo.Server(
+            ng.conf.databaseHost,
+            ng.conf.databasePort,
+            {}
+        ),
         dbname: ng.conf.databaseName,
         collection: ng.conf.sessionStoreName
     })

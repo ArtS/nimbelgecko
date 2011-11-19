@@ -91,7 +91,9 @@ function startServer() {
                         store: ng.db.getMongoStore(),
                         secret: 'blah',
                         fingerprint: '',
-                        cookieSession: {maxAge: 12 * 24 * 60 * 60 * 1000}
+                        cookie: {
+                            maxAge: 12 * 24 * 60 * 60 * 1000
+                        }
                     }),
                     connect.bodyParser(),
                     connect.router(routes),
