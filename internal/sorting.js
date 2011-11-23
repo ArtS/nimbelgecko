@@ -6,34 +6,35 @@ var ng = require('ng'),
         CATEGORY_ME,
         CATEGORY_LINK,
         CATEGORY_TEXT
-    ];
+    ]
+  , _ = require('underscore')  
 
 
 function formatLinks(text) {
-    var r = new RegExp("((?:https?|ftp)://[^\\s]*)", "gi");
-    return text.replace(r, '<a href="$1" target="_blank">$1</a>');
+    var r = new RegExp("((?:https?|ftp)://[^\\s]*)", "gi")
+    return text.replace(r, '<a href="$1" target="_blank">$1</a>')
 }
 
 
 function escapeText(text) {
-    return formatLinks(text.replace('<', '&lt;').replace('>', '&gt'));
+    return formatLinks(text.replace('<', '&lt;').replace('>', '&gt'))
 }
 
 
 function getEmptyCollection() {
     var res = {},
-        i = CATEGORIES.length;
+        i = CATEGORIES.length
     
     for(;i--;) {
-        res[CATEGORIES[i]] = [];
-        res[CATEGORIES[i]].unread_count = 0;
+        res[CATEGORIES[i]] = []
+        res[CATEGORIES[i]].unread_count = 0
     }
 
-    return res;
+    return res
 }
 
 
-function tagSingleTweet(tweet, user) {
+function getTagForTweet(tweet, user) {
 
     // 
     // Categories
@@ -53,47 +54,64 @@ function tagSingleTweet(tweet, user) {
         isFromMe = tweet.user.id_str === user.user_id
         isMe = isReply || isMention || isFromMe,
         isLink = regexLink.test(text),
-        isPlainText = !isReply && !isMention && !isLink;
+        isPlainText = !isReply && !isMention && !isLink
 
     if (isMe) {
-        return CATEGORY_ME;
+        return CATEGORY_ME
     }
 
     if (isLink) {
-        return CATEGORY_LINK;
+        return CATEGORY_LINK
     }
 
     if (isPlainText) {
-        return CATEGORY_TEXT;
+        return CATEGORY_TEXT
+    }
+}
+
+
+function removeExtraFields(obj, allowedFields) {
+
+    allowedFields = _(allowedFields)
+
+    for(var p in obj) {
+        if (!obj.hasOwnProperty(p)) 
+            continue
+
+        if (!allowedFields.contains(p))
+            delete obj[p]
     }
 }
 
 
 function sortTweets(tweets, user) {
 
-    var sorted_tweets = getEmptyCollection(),
-        length = tweets.length,
-        i = 0,
-        tweet;
+    var sorted_tweets = getEmptyCollection()
+      , length = tweets.length
+      , i = 0
+      , tweet
 
-    if (!user) {
+    if (!user)
         throw {
             name: 'NoArgumentException',
             message: 'User is not supplied'
         }
-    }
 
     for (; i < length; i++) {
-        tweet = tweets[i];
-        tweet.escaped_text = escapeText(tweet.text);
-        tag = tagSingleTweet(tweet, user);
-        sorted_tweets[tag].push(tweet);
+        tweet = tweets[i]
+        tweet.escaped_text = escapeText(tweet.text)
+        tag = getTagForTweet(tweet, user)
+
+        removeExtraFields(tweet, ['user', 'id_str', 'is_read', 'escaped_text'])
+        removeExtraFields(tweet.user, ['screen_name', 'profile_image_url'])
+
+        sorted_tweets[tag].push(tweet)
         if (tweet.is_read === false) {
-            sorted_tweets[tag].unread_count += 1;
+            sorted_tweets[tag].unread_count += 1
         }
     }
 
-    return sorted_tweets;
+    return sorted_tweets
 }
 
 exports.sortTweets = sortTweets
