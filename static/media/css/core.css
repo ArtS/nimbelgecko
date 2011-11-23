@@ -262,6 +262,27 @@ ul.list-tweets li.list-item-tweet {
  */
 
 
+/*
+ * Tweets look
+ */
+div.avatar {
+    float: left;
+    width: 48px;
+    height: 48px;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    border: 1px solid lightgray; 
+    margin-right: 8px;
+}
+
+div.tweet-body {
+}
+
+/*
+ * End Tweets look
+ */
+
+
 p small {
     font-size: 13px;
 }

@@ -15,6 +15,9 @@ $(document).ready(function() {
       , singleTweetDirective = {
             'li': {
                 'tweet<-tweets': {
+                    'div.avatar@style': function(ctx) {
+                        return 'background-image: url(' + ctx.item.user.profile_image_url + ')'
+                    },
                     'span.text': 'tweet.escaped_text',
                     'span.tweet-link a@href':
                     'http://twitter.com/#{tweet.user.screen_name}/statuses/#{tweet.id_str}',
