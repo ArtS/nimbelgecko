@@ -164,6 +164,15 @@ exports.getRecentTweets = function(opts) {
     col.find(
         selectCriteria,
         {
+            id: 1,
+            id_str:1,
+            is_read: 1,
+            text: 1,
+            user:1,
+            'user.screen_name': 1,
+            'user.profile_image_url': 1
+        },
+        {
             limit: 300,
             sort: [['id', 'desc']]
         },
@@ -497,5 +506,3 @@ exports.getUserTweetsCount = function getUserTweetsCount(opts) {
     ng.utils.checkRequiredOptions(opts, ['user_id', 'next'])
     collections[TWEETS_COLLECTION].count({'user.id_str': opts.user_id.toString()}, opts.next)
 }
-
-exports.collections = collections

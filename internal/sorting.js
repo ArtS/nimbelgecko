@@ -98,12 +98,12 @@ function sortTweets(tweets, user) {
         }
 
     for (; i < length; i++) {
+
         tweet = tweets[i]
         tweet.escaped_text = escapeText(tweet.text)
         tag = getTagForTweet(tweet, user)
 
-        removeExtraFields(tweet, ['user', 'id_str', 'is_read', 'escaped_text'])
-        removeExtraFields(tweet.user, ['screen_name', 'profile_image_url'])
+        delete tweet.text
 
         sorted_tweets[tag].push(tweet)
         if (tweet.is_read === false) {
