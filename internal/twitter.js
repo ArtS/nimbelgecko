@@ -9,6 +9,8 @@ var sys = require('sys'),
 
 function oAuthGet(options) {
 
+    console.log('options 1')
+    console.log(options)
     ng.utils.checkRequiredOptions(options, ['url',
                                             'oauth_token',
                                             'oauth_token_secret'])

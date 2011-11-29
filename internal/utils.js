@@ -1,4 +1,5 @@
 exports.checkRequiredOptions = function(options, requiredItems) {
+
     var i = 0
       , l = requiredItems.length
       

@@ -132,6 +132,7 @@ exports.getLatestTweetsFromTwitter = function(opts) {
     }
 
     function _retrieveBunch(next) {
+
         var o = {
             oauth_token: opts.user.oauth_access_token,
             oauth_token_secret: opts.user.oauth_access_token_secret,

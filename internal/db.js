@@ -105,7 +105,7 @@ exports.saveNewUser = function(opts) {
                 return opts.next(err, null)
             }
 
-            return opts.next(null, doc)
+            return opts.next(null, doc[0])
         }
     )
 }
