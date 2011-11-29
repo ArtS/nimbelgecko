@@ -60,7 +60,11 @@ exports.getGroupedTweetsFromDB = function(opts) {
             result.sinceId = arr[0].id
             ng.log.log('New max ID for @' + opts.user.screen_name + ' ' + arr[0].id)
 
-            sorted = ng.sorting.sortTweets(arr, opts.user)
+            sorted = ng.sorting.sortTweets({
+                tweets: arr,
+                user: opts.user
+            })
+
             for (key in sorted) {
                 if (!sorted.hasOwnProperty(key))
                     continue

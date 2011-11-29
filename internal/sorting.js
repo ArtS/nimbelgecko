@@ -70,38 +70,20 @@ function getTagForTweet(tweet, user) {
 }
 
 
-function removeExtraFields(obj, allowedFields) {
+function sortTweets(args) {
 
-    allowedFields = _(allowedFields)
-
-    for(var p in obj) {
-        if (!obj.hasOwnProperty(p)) 
-            continue
-
-        if (!allowedFields.contains(p))
-            delete obj[p]
-    }
-}
-
-
-function sortTweets(tweets, user) {
+    ng.utils.checkRequiredOptions(args, ['tweets', 'user'])
 
     var sorted_tweets = getEmptyCollection()
-      , length = tweets.length
+      , length = args.tweets.length
       , i = 0
       , tweet
 
-    if (!user)
-        throw {
-            name: 'NoArgumentException',
-            message: 'User is not supplied'
-        }
-
     for (; i < length; i++) {
 
-        tweet = tweets[i]
+        tweet = args.tweets[i]
         tweet.escaped_text = escapeText(tweet.text)
-        tag = getTagForTweet(tweet, user)
+        tag = getTagForTweet(tweet, args.user)
 
         delete tweet.text
 
