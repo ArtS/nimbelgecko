@@ -134,10 +134,12 @@ footer.copyright {
 
 nav {
     padding: 8px 0px;
-    margin: 0px 0px 5px 0px;
+    margin: 0px 0px 2em 0;
     background: lightgray;
-    border-radius: 5px;
-    -moz-border-radius: 5px;
+
+    -moz-box-shadow: 0 0.4em 7px #aaa;
+    -webkit-box-shadow:  0 0.4em 7px #aaa;
+    box-shadow:  0 0.4em 7px #aaa;
 }
 
 nav ul li {
@@ -195,6 +197,10 @@ section.category {
     border-radius: 10px;
     -moz-border-radius: 10px;
     background: lightgray;
+
+    -moz-box-shadow: 0.4em 0.4em 7px #aaa;
+    -webkit-box-shadow:  0.4em 0.4em 7px #aaa;
+    box-shadow:  0.4em 0.4em 7px #aaa;
 }
 
 .tagline p {
@@ -290,4 +296,4 @@ p small {
 div.tweets-loading {
     background: url('/media/img/ajax-loader.gif') no-repeat 3px center;
     height: 50px;
-}
+ main-nav}
