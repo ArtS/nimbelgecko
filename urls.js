@@ -1,9 +1,9 @@
-var ng = require('ng'),
+var ng = require('nimblegecko'),
     login_required = ng.http.login_required;
 
 exports.urls = [
     {
-        url: '/login', 
+        url: '/login',
         view: ng.views.oauth.login
     },
     {

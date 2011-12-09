@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
 
-require('./fix-paths')
+//require('./fix-paths')
 
 
 var connect = require('connect')
-  , ng = require('ng')
-  , urls = require('urls').urls
+  , ng = require('nimblegecko')
+  , urls = require('./urls').urls
   , io = require('socket.io')
   , server = null
   , runChain = require('node-chain').runChain
@@ -26,14 +26,14 @@ function bindUrls(app, url) {
             } else {
 
                 //
-                // Otherwise, get the context from the view and use it to 
+                // Otherwise, get the context from the view and use it to
                 // render the template.
                 //
-                url.view(req, res, 
+                url.view(req, res,
                     function(err, context) {
                         // In case call to view failed, show error
                         if(err) {
-                            ng.http.error(req, res, err, 
+                            ng.http.error(req, res, err,
                                           'Error obtaining context for view at ' + url.url)
                             return
                         }
@@ -153,7 +153,7 @@ process.on('uncaughtException',
             }
         } catch(ex) {
             ng.log.error(ex, 'Exception while trying to shut down the server')
-        } finally { 
+        } finally {
             startServer()
         }
     }
