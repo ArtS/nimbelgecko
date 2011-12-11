@@ -1,10 +1,6 @@
 #!/usr/bin/env node
 
-
-require('./fix-paths')
-
-
-var ng = require('ng')
+var ng = require('nimblegecko')
     runChain = require('node-chain').runChain,
     STREAM_CHECK_INTERVAL = 60000
     EventEmitter = require('events').EventEmitter
