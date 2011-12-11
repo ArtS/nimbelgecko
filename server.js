@@ -5,7 +5,7 @@ require('./fix-paths')
 
 
 var connect = require('connect')
-  , ng = require('ng')
+  , ng = require('./ng')
   , urls = require('urls').urls
   , io = require('socket.io')
   , server = null
