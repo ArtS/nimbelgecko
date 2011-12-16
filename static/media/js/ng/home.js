@@ -1,12 +1,7 @@
 $(document).ready(function() {
 
     var isLoaded = false
-      , TweetModel = Backbone.Model.extend({
-                          markAsRead: function() {
-                              this.set({is_read: true})
-                          }
-                      })
-
+      , TweetModel = Backbone.Model.extend({})
       , Collection = Backbone.Collection.extend({
                           model: TweetModel,
                      })
@@ -19,7 +14,7 @@ $(document).ready(function() {
                     'div.avatar@style': function(ctx) {
                         return 'background-image: url(' + ctx.item.user.profile_image_url + ')'
                     },
-                    'span.text': 'tweet.escaped_text',
+                    'span.text': 'tweet.text',
                     'span.tweet-link a@href':
                     'http://twitter.com/#!#{tweet.user.screen_name}/statuses/#{tweet.id_str}',
                     'span.tweet-link a': '@#{tweet.user.screen_name}'
