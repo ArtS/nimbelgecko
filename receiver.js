@@ -12,8 +12,8 @@ function startReceivingAllTweets() {
 
     function startReceivingStream(allUserIds) {
 
-        var stream = new ng.twitter.ReceivingStream(allUserIds)
-          , rstEvent = new EventEmitter()
+        var rstEvent = new EventEmitter()
+          , stream = new ng.twitter.ReceivingStream(allUserIds)
           , timeoutWatcher = new ng.watcher.TimeoutWatcher(STREAM_CHECK_INTERVAL)
           , notificationtimeoutWatcher = new ng.watcher.NotificationWatcher(STREAM_CHECK_INTERVAL)
 
@@ -28,6 +28,7 @@ function startReceivingAllTweets() {
             timeoutWatcher.startWatching(rstEvent)
             notificationtimeoutWatcher.startWatching(rstEvent)
         })
+
         stream.on('data_arrvied', function() { timeoutWatcher.keepAlive() } )
         stream.on('shutdown', startReceivingAllTweets)
     }
@@ -70,7 +71,7 @@ function startReceiver() {
 process.on('uncaughtException',
     function(err) {
         ng.log.error(err, 'Unhandled exception')
-        startReceiver()
+        //startReceiver()
     }
 )
 
