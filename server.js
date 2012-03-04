@@ -59,9 +59,8 @@ function routes(app) {
     var i = 0,
         l = urls.length
 
-        for(; i < l; i++) {
-        bindUrls(app, urls[i])
-    }
+    for(; i < l; i++)
+       bindUrls(app, urls[i])
 }
 
 
@@ -151,7 +150,7 @@ process.on('uncaughtException',
         } catch(ex) {
             ng.log.error(ex, 'Exception while trying to shut down the server')
         } finally {
-            startServer()
+            //startServer()
         }
     }
 )
