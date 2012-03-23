@@ -6,32 +6,32 @@
     <head class="html5reset-kitchensink-commented">
 
         <meta charset="utf-8" />
-        
+
         <!-- This prevents the conditional comments below from holding up the page load
             www.phpied.com/conditional-comments-block-downloads/ -->
         <!--[if IE]><![endif]-->
-        
+
         <title>NimbleGecko</title>
-        
+
         <meta name="description" content="NimbleGecko helps you to cut through the enourmous amount of information by sorting and prioritising your tweets." />
         <!-- Google will often use this as its description of your page/site. Make it good. -->
-        
+
         <meta name="author" content="NimbleGecko" />
         <meta name="Copyright" content="Copyright NimbleGecko 2010. All Rights Reserved." />
 
         <meta name="DC.title" content="NimbleGecko" />
         <meta name="DC.subject" content="NimbleGecko helps you to cut through the enourmous amount of information by sorting and prioritising your tweets." />
         <meta name="DC.creator" content="NimbleGecko" />
-        
+
         <meta name="google-site-verification" content="" />
         <!-- Speaking of Google, don't forget to set your site up: http://google.com/webmasters -->
-        
+
         <link rel="shortcut icon" href="/media/img/favicon.png"/>
         <!-- This is the traditional favicon.
             - size: 16x16 or 32x32
             - transparency is OK
             - see wikipedia for info on browser support: http://mky.be/favicon/ -->
-        
+
         <link rel="apple-touch-icon" href="/media/img/custom/mediaicon.png"/>
         <!-- The is the icon for iOS's Web Clip.
             - size: 57x57 for older iPhones, 72x72 for iPads, 114x114 for iPhone4's retina display (IMHO, just go ahead and use the biggest one)
@@ -40,12 +40,12 @@
 
         <link rel="stylesheet" href="/media/css/main.css" />
         <!-- main.css is a gateway file. You will spend your time in core.css -->
-        
+
         <link rel="stylesheet" href="/media/css/_print/main.css" media="print" />
-        
-        <!-- These are IE-specific conditional style sheets. 
+
+        <!-- These are IE-specific conditional style sheets.
             You might consider removing the ones you don't end up using. -->
-            
+
         <!--[if IE]>
         <link rel="stylesheet" href="/media/css/patches/win-ie-all.css" />
         <![endif]-->
@@ -58,13 +58,13 @@
 
         <!-- 12 columns Grid CSS -->
         <link rel="stylesheet" href="/media/css/cssgrid/1140.css">
-        
+
         <!-- The following is STRONGLY OPTIONAL, but useful if you really need to kick IE in the pants.
             There are different flavors; pick the one right for your project: http://code.google.com/p/ie7-js/ -->
         <!--[if lt IE 8]>
         <script src="http://ie7-js.googlecode.com/svn/version/2.0(beta3)/IE8.js"></script>
         <![endif]-->
-        
+
         <script src="/media/js/jquery-1.4.4.min.js"></script>
         <script src="/media/js/underscore.js"></script>
         <script src="/media/js/backbone.js"></script>
@@ -73,14 +73,14 @@
         <script src="/media/js/cssgrid/css3-mediaqueries.js"></script>
         <script src="http://platform.twitter.com/widgets.js"></script>
 
-        <!-- Either Modernizr OR the HTML5 Shiv script is required if you want IE compatability, AND you want to use the new, 
-            more-semantic HTML5 elements (header, article, footer, etc) 
+        <!-- Either Modernizr OR the HTML5 Shiv script is required if you want IE compatability, AND you want to use the new,
+            more-semantic HTML5 elements (header, article, footer, etc)
             - we've only included Modernizr; HTML5 Shiv can be found here: http://html5shiv.googlecode.com -->
-        
+
         <!-- MODERNIZR: http://www.modernizr.com/
-            If you're using this, you don't need the HTML5 Shiv script below -->   
+            If you're using this, you don't need the HTML5 Shiv script below -->
         <!-- <script src="/media/js/modernizr-1.5.min.js"></script> -->
-        
+
         <!-- don't forget Google Analytics -->
         <script type="text/javascript">
             var _gaq = _gaq || [];
@@ -103,12 +103,16 @@
 
             <ul id="tweetTemplate">
                 <li class="list-item-tweet">
-                    <a class="avatar-link" target="_blank" href=""><div class="avatar"></div></a>
-                    <div class="tweet-body">
-                        <span class="text"></span>
-                        <span class="tweet-link">
-                            <a href="" target="_blank">@</a>
-                        </span>
+                    <div class="sender">
+                        <a href="" target="_blank">@</a>
+                    </div>
+                    <div class="left">
+                        <a class="avatar-link" target="_blank" href=""><div class="avatar"></div></a>
+                    </div>
+                    <div class="left">
+                        <div class="tweet-body">
+                            <span class="text"></span>
+                        </div>
                     </div>
                     <div class="clear"></div>
                 </li>
@@ -138,7 +142,7 @@
                 <ul class="twelvecol navigation last">
                     <li><a href="http://twitter.com/intent/tweet">Post</a></li>
                     <li class="signout"><a href="/signout">Sign out</a></li>
-                </ul>            
+                </ul>
             </div>
         </nav>
 
@@ -161,7 +165,7 @@
                 </section>
 
             </article>
-            
+
         </div>
 
         <script type="text/javascript" charset="utf-8" src="/media/js/ng/home.js"></script>

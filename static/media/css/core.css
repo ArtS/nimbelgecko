@@ -172,7 +172,7 @@ nav li a, nav li a:visited {
 }
 
 /*
- * End Navigation 
+ * End Navigation
  * /
 
 
@@ -254,9 +254,9 @@ ul.list-tweets {
 }
 
 li.list-item-tweet {
-    margin: 0px 0px 23px 0px;
-    font-size: 13px;
-    line-height: 16px;
+    margin: 0 0 1.2em 0;
+    font-size: 0.813em;
+    line-height: 1em;
 }
 
 ul.list-tweets li.list-item-tweet {
@@ -271,17 +271,29 @@ ul.list-tweets li.list-item-tweet {
 /*
  * Tweets look
  */
+
+div.sender {
+    margin: 0 0 0.3em 0;
+    font-weight: 400;
+    font-family: helvetica, arial, sans-serif;
+}
+
+div.sender a {
+    color: #3C3C3C;
+}
+
 div.avatar {
     float: left;
     width: 48px;
     height: 48px;
     border-radius: 5px;
     -moz-border-radius: 5px;
-    border: 1px solid lightgray; 
+    border: 1px solid lightgray;
     margin-right: 8px;
 }
 
 div.tweet-body {
+    width: 18em;
 }
 
 /*

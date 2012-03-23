@@ -15,9 +15,8 @@ $(document).ready(function() {
                         return 'background-image: url(' + ctx.item.user.profile_image_url + ')'
                     },
                     'span.text': 'tweet.text',
-                    'span.tweet-link a@href':
-                    'http://twitter.com/#!#{tweet.user.screen_name}/statuses/#{tweet.id_str}',
-                    'span.tweet-link a': '@#{tweet.user.screen_name}'
+                    '.sender a@href': 'http://twitter.com/#!#{tweet.user.screen_name}/statuses/#{tweet.id_str}',
+                    '.sender a': '@#{tweet.user.screen_name} #{tweet.user.name}'
                 }
             }
         }
@@ -25,8 +24,7 @@ $(document).ready(function() {
       , View = Backbone.View.extend({
 
             templateElem: $('#sectionsDiv'),
-            
-            
+
             render: function() {
 
                 var directives = {
@@ -44,7 +42,7 @@ $(document).ready(function() {
                                 },
                                 'header div.right a.tiny-action@href+': 'coll.attributes.key',
 
-                                'ul@id+': 'coll.attributes.key', 
+                                'ul@id+': 'coll.attributes.key',
 
                                 'ul': function(ctx) {
                                     return renderSingleTweet({tweets: ctx.item.attributes.tweets})
