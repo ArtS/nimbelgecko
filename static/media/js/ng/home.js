@@ -14,9 +14,10 @@ $(document).ready(function() {
                     'div.avatar@style': function(ctx) {
                         return 'background-image: url(' + ctx.item.user.profile_image_url + ')'
                     },
-                    'span.text': 'tweet.text',
+                    '.text': 'tweet.text',
                     '.sender a@href': 'http://twitter.com/#!#{tweet.user.screen_name}/statuses/#{tweet.id_str}',
-                    '.sender a': '@#{tweet.user.screen_name} #{tweet.user.name}'
+                    '.sender a.screen-name': '@#{tweet.user.screen_name}',
+                    '.sender a.name': '#{tweet.user.name}'
                 }
             }
         }
@@ -33,14 +34,13 @@ $(document).ready(function() {
 
                             'coll<-collections': {
 
-                                'header div.left h3': function(arg) {
+                                'h3': function(arg) {
                                     if (typeof arg.coll.item.attributes.screen_name !== 'undefined') {
                                         return arg.coll.item.attributes.screen_name
                                     } else {
                                         return arg.coll.item.attributes.key
                                     }
                                 },
-                                'header div.right a.tiny-action@href+': 'coll.attributes.key',
 
                                 'ul@id+': 'coll.attributes.key',
 

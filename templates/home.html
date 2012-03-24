@@ -59,6 +59,8 @@
         <!-- 12 columns Grid CSS -->
         <link rel="stylesheet" href="/media/css/cssgrid/1140.css">
 
+        <link rel="stylesheet" href="/media/css/ng.css" />
+
         <!-- The following is STRONGLY OPTIONAL, but useful if you really need to kick IE in the pants.
             There are different flavors; pick the one right for your project: http://code.google.com/p/ie7-js/ -->
         <!--[if lt IE 8]>
@@ -103,32 +105,28 @@
 
             <ul id="tweetTemplate">
                 <li class="list-item-tweet">
-                    <div class="sender">
-                        <a href="" target="_blank">@</a>
-                    </div>
-                    <div class="left">
-                        <a class="avatar-link" target="_blank" href=""><div class="avatar"></div></a>
-                    </div>
-                    <div class="left">
-                        <div class="tweet-body">
-                            <span class="text"></span>
+
+                    <a class="avatar-link" target="_blank" href="">
+                        <div class="avatar"></div>
+                    </a>
+
+                    <div class="tweet-body">
+                        <div class="sender">
+                            <a href="" class="screen-name" target="_blank"></a>
+                            <a href="" class="name" target="_blank"></a>
                         </div>
+                        <div class="text"></div>
                     </div>
+
                     <div class="clear"></div>
                 </li>
             </ul>
 
             <div id="sectionsDiv" class="categories row">
-                <div class="fourcol">
+                <div class="fourcol category-column">
                     <section class="category">
                         <header>
-                            <div class="left">
-                                <h3></h3>
-                            </div>
-                            <div class="right">
-                                <a class="tiny-action" style="display: none;" href="#actions/mark-read/">[mark all read]</a>
-                            </div>
-                            <div class="clear"></div>
+                            <h3></h3>
                         </header>
                         <ul class="list-tweets" id="type_"></ul>
                     </section>
