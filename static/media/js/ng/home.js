@@ -14,7 +14,9 @@ $(document).ready(function() {
                     'div.avatar@style': function(ctx) {
                         return 'background-image: url(' + ctx.item.user.profile_image_url + ')'
                     },
-                    '.text': 'tweet.text',
+                    '.text': function(ctx) {
+                        return decodeURIComponent(escape(ctx.item.text))
+                    },
                     '.sender a@href': 'http://twitter.com/#!#{tweet.user.screen_name}/statuses/#{tweet.id_str}',
                     '.sender a.screen-name': '@#{tweet.user.screen_name}',
                     '.sender a.name': '#{tweet.user.name}'
