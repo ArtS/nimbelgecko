@@ -1,7 +1,11 @@
-@import url('http://fonts.googleapis.com/css?family=Open+Sans');
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:400,600,700,300);
 
 /* Setting body font size in percentages */
 /* http://www.alistapart.com/articles/howtosizetextincss/ */
+
+html, body {
+    height: 100%;
+}
 
 body {
     font-size:100%;
@@ -51,8 +55,9 @@ body.main-page {
 
 div.main-container {
     margin: 0 auto;
-    width: 35em;
     text-align: left;
+    width: 35em;
+    height: 100%;
 }
 
 
@@ -86,10 +91,11 @@ header h1, header h2, header h3 {
 }
 
 header h1 {
+    font-weight: 400;
     font-size: 4.625em;
     line-height: 1.125em;
     letter-spacing: 0em;
-    margin-left: -0.085em;
+    margin-left: -0.07em;
 }
 
 header h2 {
@@ -101,8 +107,14 @@ section.category h3 {
     font-size: 1em;
 }
 
+section.login {
+    margin: 5.063em 0;
+}
+
 footer.copyright {
-    margin: 20px 0px 20px 0px;
+    font-family: 'Open Sans';
+    color: #3c3c3c;
+    margin: 1.5em 0 1.5em 0;
 }
 
 /*
@@ -111,7 +123,7 @@ footer.copyright {
 
 nav {
     padding: 8px 0px;
-    margin: 0px 0px 2em 0;
+    margin: 0px 0px 1em 0;
     background: lightgray;
 
     -moz-box-shadow: 0 0.4em 7px #aaa;
@@ -156,16 +168,10 @@ nav li a, nav li a:visited {
 /*
  * Column sections
  */
-.category-column {
-    /*
-       This is to allow for the bottom part of shadow
-       of tallest column to be displayed
-    */
-    padding-bottom: 1em;
-}
 
-section.categories {
-    padding-top: 7px;
+.categories {
+    padding-top: 1em;
+    padding-bottom: 1em;
 }
 
 section.category header {
@@ -188,12 +194,12 @@ section.category {
 }
 
 .tagline p {
-}
-
-.tagline p {
     text-align: left;
     font-weight: 300;
     font-family: 'Open Sans';
+    font-size: 1.5em;
+    letter-spacing: 0.05em;
+    margin-top: 0.5em;
 }
 
 /*
@@ -207,13 +213,29 @@ a:hover {
     text-decoration: underline;
 }
 
-.action a {
-    border: 0px;
-    padding: 50px 0;
+a.login-link:hover {
+    text-decoration: none;
+    background: #3C7;
 }
 
-a.action-link {
+a.login-link {
+
     display: block;
+
+    margin: 1em 0 1em 0;
+    padding: 1em;
+
+    width: 12em;
+    font-weight: 600;
+    font-size: 1.5em;
+    font-family: 'Open Sans';
+    text-transform: uppercase;
+    text-align: center;
+    letter-spacing: 0.045em;
+
+    color: white;
+    background-color: #3C3C3C;
+
 }
 
 .author a {
