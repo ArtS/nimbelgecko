@@ -111,9 +111,11 @@ section.login {
     margin: 5.063em 0;
 }
 
+footer.copyright a,
+footer.copyright a:visited,
 footer.copyright {
     font-family: 'Open Sans';
-    color: #3c3c3c;
+    color: #ccc;
     margin: 1.5em 0 1.5em 0;
 }
 
