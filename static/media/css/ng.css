@@ -1,4 +1,5 @@
 @import url(http://fonts.googleapis.com/css?family=Open+Sans:400,600,700,300);
+@import url(http://fonts.googleapis.com/css?family=Fanwood+Text);
 
 /* Setting body font size in percentages */
 /* http://www.alistapart.com/articles/howtosizetextincss/ */
@@ -44,7 +45,7 @@ body {
 body {
     background-color: transparent;
     color: #3c3c3c;
-    font-family: Georgia, serif;
+    font-family: 'Fanwood Text', serif;
     margin: 0 auto;
     width: 100%;
 }
@@ -83,7 +84,7 @@ header h1, header h2, header h3, article h1 {
 header h1, header h2, header h3 {
     text-align: left;
     letter-spacing: 0;
-    font-weight: bold;
+    font-weight: 600;
 }
 
 .main-page header {
@@ -105,6 +106,8 @@ header h2 {
 
 section.category h3 {
     font-size: 1em;
+    position: relative;
+    top: -0.2em;
 }
 
 section.login {
@@ -181,18 +184,9 @@ section.category header {
 }
 
 section.category {
-    margin: 0 1em 0 0;
-    padding: 0.5em 0.7em 0.5em 0.7em;
-}
-
-section.category {
-    border: 1px solid #aaa;
-    border-radius: 10px;
-    -moz-border-radius: 10px;
-
-    -moz-box-shadow: 0.5em 0.5em 0.7em #cfcfcf;
-    -webkit-box-shadow: 0.5em 0.5em 0.7em #cfcfcf;
-    box-shadow: 0.5em 0.5em 0.7em #cfcfcf;
+    padding: 0 0.5em;
+    border-left: 2px solid #ddd;
+    border-right: 1px dotted #aaa;
 }
 
 .tagline p {
@@ -218,9 +212,19 @@ a:hover {
 a.login-link:hover {
     text-decoration: none;
     background: #3C7;
+
+    -o-transition: all .25s ease-in-out;
+    -moz-transition: all .25s ease-in-out;
+    -webkit-transition: all .25s ease-in-out;
+    transition: all .25s ease-in-out;
 }
 
 a.login-link {
+
+    -o-transition: all .5s ease-in-out;
+    -moz-transition: all .5s ease-in-out;
+    -webkit-transition: all .5s ease-in-out;
+    transition: all .5s ease-in-out;
 
     display: block;
 
@@ -275,8 +279,10 @@ ul.list-tweets li.list-item-tweet {
  */
 
 div.sender {
-    padding: 0 0 0.4em 0;
-    font-family: helvetica, arial, sans-serif;
+    padding: 0 0 0.3em 0;
+    font-family: 'open sans', 'helvetica neue', helvetica, arial, sans-serif;
+    position: relative;
+    top: -0.2em;
 }
 
 div.sender a.screen-name {
@@ -318,7 +324,8 @@ div.tweet-body {
 }
 
 .tweet-body .text {
-    line-height: 1.35em;
+    line-height: 1.25em;
+    font-size: 1.2em;
 }
 /*
  * End Tweets look

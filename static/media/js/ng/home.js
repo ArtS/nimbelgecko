@@ -18,8 +18,10 @@ $(document).ready(function() {
                         return decodeURIComponent(escape(ctx.item.text))
                     },
                     '.sender a@href': 'http://twitter.com/#!#{tweet.user.screen_name}/statuses/#{tweet.id_str}',
-                    '.sender a.screen-name': '@#{tweet.user.screen_name}',
-                    '.sender a.name': '#{tweet.user.name}'
+                    '.sender a.screen-name': '#{tweet.user.name}',
+                    '.sender a.name': '@#{tweet.user.screen_name}'
+                    /*'.sender a.screen-name': '@#{tweet.user.screen_name}',
+                    '.sender a.name': '#{tweet.user.name}'*/
                 }
             }
         }
