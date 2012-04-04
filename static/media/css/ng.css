@@ -127,13 +127,9 @@ footer.copyright {
  */
 
 nav {
-    padding: 8px 0px;
-    margin: 0px 0px 1em 0;
-    background: lightgray;
-
-    -moz-box-shadow: 0 0.4em 7px #aaa;
-    -webkit-box-shadow:  0 0.4em 7px #aaa;
-    box-shadow:  0 0.4em 7px #aaa;
+    position: fixed;
+    top: 1em;
+    left: 1em;
 }
 
 nav ul li {
@@ -143,32 +139,33 @@ nav ul li {
 }
 
 nav ul li {
-    color: white;
-    background: gray;
+    color: #3c3c3c;
+    background: #ddd;
     border-radius: 5px;
     -moz-border-radius: 5px;
 }
 
 nav ul li {
-    float: left;
     list-style: none;
-    padding: 2px 6px;
-    margin: 0px 5px 0px 5px;
+    padding: 0 0.5em 0.15em 0.4em;
+    margin: 0 0 0.4em 0;
 }
 
-nav li.signout {
-    float: right;
-}
-
-nav li a, nav li a:visited {
-    color:white;
+nav a li,
+nav a:visited li,
+nav a:hover li,
+nav li {
+    color: #3c3c3c;
     text-decoration: none;
 }
 
 /*
  * End Navigation
- * /
+ */
 
+#sectionsPlaceholder {
+    padding-top: 0.5em;
+}
 
 /*
  * Column sections
