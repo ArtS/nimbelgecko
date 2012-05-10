@@ -132,31 +132,43 @@ nav {
     left: 1em;
 }
 
+@media (max-width: 1328px) {
+    nav {
+        position: relative;
+    }
+}
+
 nav ul li {
     font-size: 15px;
     letter-spacing: 0.7px;
     line-height: 18px;
+    width: 4.2em;
 }
 
 nav ul li {
     color: #3c3c3c;
     background: #ddd;
-    border-radius: 5px;
-    -moz-border-radius: 5px;
 }
 
 nav ul li {
     list-style: none;
-    padding: 0 0.5em 0.15em 0.4em;
-    margin: 0 0 0.4em 0;
+    padding: 0.198em 0.444em 0.296em 0.444em;
+    margin: 0 0 0.667em 0;
 }
 
-nav a li,
-nav a:visited li,
-nav a:hover li,
-nav li {
+nav a,
+nav a:visited,
+nav a li {
     color: #3c3c3c;
     text-decoration: none;
+}
+
+nav a:hover {
+    text-decoration: none;
+}
+
+nav a:hover li {
+    background: #3C7;
 }
 
 /*
@@ -195,9 +207,34 @@ section.category {
     margin-top: 0.5em;
 }
 
+
+/* */
+/* Transitions */
+/* */
+
+nav a:hover li,
+a.login-link:hover {
+
+    -o-transition: all .25s ease-in-out;
+    -moz-transition: all .25s ease-in-out;
+    -webkit-transition: all .25s ease-in-out;
+    transition: all .25s ease-in-out;
+
+}
+
+nav a li,
+a.login-link {
+
+    -o-transition: all .5s ease-in-out;
+    -moz-transition: all .5s ease-in-out;
+    -webkit-transition: all .5s ease-in-out;
+    transition: all .5s ease-in-out;
+}
+
 /*
  * Links
  */
+
 a {
     text-decoration: none;
 }
@@ -209,20 +246,9 @@ a:hover {
 a.login-link:hover {
     text-decoration: none;
     background: #3C7;
-
-    -o-transition: all .25s ease-in-out;
-    -moz-transition: all .25s ease-in-out;
-    -webkit-transition: all .25s ease-in-out;
-    transition: all .25s ease-in-out;
 }
 
 a.login-link {
-
-    -o-transition: all .5s ease-in-out;
-    -moz-transition: all .5s ease-in-out;
-    -webkit-transition: all .5s ease-in-out;
-    transition: all .5s ease-in-out;
-
     display: block;
 
     margin: 1em 0 1em 0;
