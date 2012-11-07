@@ -96,7 +96,7 @@ function startServer() {
                     connect.static('./static')
                 )
 
-                var sio = io.listen(server, {'log level': 2})
+                var sio = io.listen(server, {'log level': 3})
 
                 sio.set('authorization', function(data, accept) {
 
