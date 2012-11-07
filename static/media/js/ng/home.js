@@ -108,7 +108,7 @@ $(document).ready(function() {
 
         function() {
 
-            var socket = io.connect(null, {
+            var socket = io.connect('http://nimblegecko.com', {
                     rememberTransport: false/*,
                     transports: ['websocket', 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-polling']*/
                 })

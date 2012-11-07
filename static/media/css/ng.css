@@ -82,6 +82,7 @@ header h1, header h2, header h3, article h1 {
 }
 
 header h1, header h2, header h3 {
+    color: #3C3C3C;
     text-align: left;
     letter-spacing: 0;
     font-weight: 600;
@@ -111,7 +112,11 @@ section.category h3 {
 }
 
 section.login {
-    margin: 5.063em 0;
+    margin: 5.063em 0 2.063em 0;
+}
+
+article.blog {
+    margin-bottom: 2em;
 }
 
 footer.copyright a,
