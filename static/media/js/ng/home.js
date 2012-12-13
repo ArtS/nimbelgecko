@@ -108,7 +108,8 @@ $(document).ready(function() {
 
         function() {
 
-            var socket = io.connect('http://nimblegecko.com', {
+            //TODO: replace with string from config
+            var socket = io.connect('http://reader.nimblegecko.com', {
                     rememberTransport: false/*,
                     transports: ['websocket', 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-polling']*/
                 })
