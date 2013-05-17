@@ -1,10 +1,7 @@
 #!/usr/bin/env node
 
 
-require('./fix-paths')
-
-
-var ng = require('ng')
+var ng = require('nimblegecko')
   , runChain = require('node-chain').runChain
   , _ = require('underscore')
 

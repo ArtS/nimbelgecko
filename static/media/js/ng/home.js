@@ -14,10 +14,14 @@ $(document).ready(function() {
                     'div.avatar@style': function(ctx) {
                         return 'background-image: url(' + ctx.item.user.profile_image_url + ')'
                     },
-                    'span.text': 'tweet.text',
-                    'span.tweet-link a@href':
-                    'http://twitter.com/#!#{tweet.user.screen_name}/statuses/#{tweet.id_str}',
-                    'span.tweet-link a': '@#{tweet.user.screen_name}'
+                    '.text': function(ctx) {
+                        return decodeURIComponent(escape(ctx.item.text))
+                    },
+                    '.sender a@href': 'http://twitter.com/#!#{tweet.user.screen_name}/statuses/#{tweet.id_str}',
+                    '.sender a.screen-name': '#{tweet.user.name}',
+                    '.sender a.name': '@#{tweet.user.screen_name}'
+                    /*'.sender a.screen-name': '@#{tweet.user.screen_name}',
+                    '.sender a.name': '#{tweet.user.name}'*/
                 }
             }
         }
@@ -25,8 +29,7 @@ $(document).ready(function() {
       , View = Backbone.View.extend({
 
             templateElem: $('#sectionsDiv'),
-            
-            
+
             render: function() {
 
                 var directives = {
@@ -35,16 +38,15 @@ $(document).ready(function() {
 
                             'coll<-collections': {
 
-                                'header div.left h3': function(arg) {
+                                'h3': function(arg) {
                                     if (typeof arg.coll.item.attributes.screen_name !== 'undefined') {
                                         return arg.coll.item.attributes.screen_name
                                     } else {
                                         return arg.coll.item.attributes.key
                                     }
                                 },
-                                'header div.right a.tiny-action@href+': 'coll.attributes.key',
 
-                                'ul@id+': 'coll.attributes.key', 
+                                'ul@id+': 'coll.attributes.key',
 
                                 'ul': function(ctx) {
                                     return renderSingleTweet({tweets: ctx.item.attributes.tweets})
@@ -106,7 +108,8 @@ $(document).ready(function() {
 
         function() {
 
-            var socket = io.connect(null, {
+            //TODO: replace with string from config
+            var socket = io.connect('http://reader.nimblegecko.com', {
                     rememberTransport: false/*,
                     transports: ['websocket', 'flashsocket', 'htmlfile', 'xhr-multipart', 'xhr-polling']*/
                 })
