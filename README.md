@@ -24,3 +24,12 @@ To reduce the noise, I separete the incoming stream of consciousnes (that is twe
 So end user experience is rather simple and looks something like this:
 
 ![Reader UI screenshot](https://raw.github.com/ArtS/nimbelgecko/master/mockups/screenshot.png)
+
+In here, **"text"** is the text-only updates that are generally of less urgency, yet of more social importance than the 
+rest of the stuff; **"links"** are self-explainatory (I hope!) and **"@your_awesome_twitter_name"** is - you guessed it - 
+all your tweets, replies etc.
+
+Setting Up
+----------
+
+[TODO: add this section]
