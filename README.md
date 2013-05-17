@@ -1,4 +1,4 @@
-Nimbelgecko Twitter Reader
+Nimblegecko Twitter Reader
 ===========
 
 Did you ever open your Twitter and wondered **"what the hell is happening here?"**, when looking 
